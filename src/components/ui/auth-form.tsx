@@ -35,7 +35,8 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
         title: "Login successful",
         description: "Welcome back!",
       });
-      navigate("/dashboard");
+      // Redirect to home page instead of dashboard
+      navigate("/");
     } catch (error) {
       console.error(error);
       toast({
@@ -66,7 +67,8 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
         title: "Registration successful",
         description: "Your account has been created. Welcome to Wanderly!",
       });
-      navigate("/dashboard");
+      // Redirect to home page instead of dashboard
+      navigate("/");
     } catch (error) {
       console.error(error);
       toast({
@@ -89,7 +91,8 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
         title: "Login successful",
         description: "Welcome to Wanderly!",
       });
-      navigate("/dashboard");
+      // Redirect to home page instead of dashboard
+      navigate("/");
     } catch (error) {
       console.error(error);
       toast({
