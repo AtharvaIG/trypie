@@ -1,14 +1,22 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser, SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isSignedIn, user } = useUser();
+  const { currentUser, logout } = useAuth();
   const location = useLocation();
   
   useEffect(() => {
@@ -24,6 +32,21 @@ export function Navbar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
+
+  const getUserInitials = () => {
+    if (!currentUser?.displayName) return "U";
+    const names = currentUser.displayName.split(" ");
+    if (names.length === 1) return names[0][0];
+    return `${names[0][0]}${names[names.length - 1][0]}`;
+  };
 
   return (
     <header 
@@ -41,7 +64,7 @@ export function Navbar() {
           </span>
         </Link>
         
-        <SignedIn>
+        {currentUser ? (
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               to="/dashboard"
@@ -68,13 +91,7 @@ export function Navbar() {
               Groups
             </Link>
           </nav>
-
-          <div className="hidden md:flex items-center space-x-4">
-            <UserButton afterSignOutUrl="/" />
-          </div>
-        </SignedIn>
-        
-        <SignedOut>
+        ) : (
           <nav className="hidden md:flex items-center space-x-8">
             {["Features", "About", "Contact"].map((item) => (
               <Link
@@ -86,16 +103,43 @@ export function Navbar() {
               </Link>
             ))}
           </nav>
+        )}
 
+        {currentUser ? (
+          <div className="hidden md:flex items-center space-x-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full" size="icon">
+                  <Avatar>
+                    <AvatarImage src={currentUser.photoURL || undefined} alt="Profile" />
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" className="text-sm" asChild>
-              <Link to="#sign-up">Log in</Link>
+              <Link to="/#login">Log in</Link>
             </Button>
             <Button size="sm" className="text-sm" asChild>
-              <Link to="#sign-up">Sign up</Link>
+              <Link to="/#register">Sign up</Link>
             </Button>
           </div>
-        </SignedOut>
+        )}
         
         <button 
           className="md:hidden text-foreground"
@@ -109,7 +153,7 @@ export function Navbar() {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md py-4 px-4 border-t border-border animate-fade-in">
-          <SignedIn>
+          {currentUser ? (
             <nav className="flex flex-col space-y-3">
               <Link
                 to="/dashboard"
@@ -141,14 +185,17 @@ export function Navbar() {
               >
                 Profile
               </Link>
-              <div className="pt-2 border-t border-border flex items-center px-4 py-2">
-                <UserButton afterSignOutUrl="/" />
-                <span className="ml-3 text-sm font-medium">{user?.firstName || "Account"}</span>
+              <div className="pt-2 border-t border-border">
+                <Button 
+                  variant="ghost" 
+                  className="text-sm w-full justify-start"
+                  onClick={handleLogout}
+                >
+                  Log out
+                </Button>
               </div>
             </nav>
-          </SignedIn>
-          
-          <SignedOut>
+          ) : (
             <nav className="flex flex-col space-y-3">
               {["Features", "About", "Contact"].map((item) => (
                 <Link
@@ -161,14 +208,14 @@ export function Navbar() {
               ))}
               <div className="flex flex-col space-y-2 pt-2 border-t border-border">
                 <Button variant="ghost" className="justify-start" asChild>
-                  <Link to="#sign-up">Log in</Link>
+                  <Link to="/#login">Log in</Link>
                 </Button>
                 <Button className="w-full" asChild>
-                  <Link to="#sign-up">Sign up</Link>
+                  <Link to="/#register">Sign up</Link>
                 </Button>
               </div>
             </nav>
-          </SignedOut>
+          )}
         </div>
       )}
     </header>

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,10 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">(type);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, isLoaded: signInLoaded } = useSignIn();
-  const { signUp, isLoaded: signUpLoaded } = useSignUp();
+  const { login, register, signInWithGoogle } = useAuth();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!signInLoaded) return;
     
     setIsLoading(true);
     
@@ -31,18 +29,13 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
     const password = formData.get("password") as string;
     
     try {
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
+      await login(email, password);
       
-      if (result.status === "complete") {
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-        navigate("/dashboard");
-      }
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
       toast({
@@ -57,7 +50,6 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
   
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!signUpLoaded) return;
     
     setIsLoading(true);
     
@@ -68,25 +60,41 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
     const password = formData.get("password") as string;
     
     try {
-      const result = await signUp.create({
-        firstName,
-        lastName,
-        emailAddress: email,
-        password,
-      });
+      await register(email, password);
       
-      if (result.status === "complete") {
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created. Welcome to Wanderly!",
-        });
-        navigate("/dashboard");
-      }
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. Welcome to Wanderly!",
+      });
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
       toast({
         title: "Registration failed",
         description: "There was an error creating your account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    
+    try {
+      await signInWithGoogle();
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome to Wanderly!",
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Google sign-in failed",
+        description: "There was an error signing in with Google. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -276,7 +284,13 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
           </div>
           
           <div className="grid grid-cols-1 gap-3">
-            <Button variant="outline" type="button" className="w-full">
+            <Button 
+              variant="outline" 
+              type="button" 
+              className="w-full" 
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+            >
               <svg
                 className="mr-2 h-4 w-4"
                 aria-hidden="true"
