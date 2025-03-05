@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
-import { Navbar } from "@/components/ui/navbar";
+import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

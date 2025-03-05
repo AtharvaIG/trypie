@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Navbar } from "@/components/ui/navbar";
+import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/ui/hero-section";
 import { FeatureSection } from "@/components/ui/feature-section";
 import { AuthForm } from "@/components/ui/auth-form";

@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/ui/navbar";
+import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

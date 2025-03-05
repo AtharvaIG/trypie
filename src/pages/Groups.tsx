@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/ui/navbar";
+import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

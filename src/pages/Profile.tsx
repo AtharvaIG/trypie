@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
-import { Navbar } from "@/components/ui/navbar";
+import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/ui/avatar";
