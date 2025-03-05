@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, Home, Plane, Camera, Users, Bell, User } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -48,6 +48,14 @@ export function Navbar() {
     return `${names[0][0]}${names[names.length - 1][0]}`;
   };
 
+  // Navigation items
+  const navItems = [
+    { title: "Home", icon: <Home className="w-4 h-4 mr-2" />, path: "/" },
+    { title: "Plan Trip", icon: <Plane className="w-4 h-4 mr-2" />, path: "/create-trip" },
+    { title: "Community", icon: <Camera className="w-4 h-4 mr-2" />, path: "/community" },
+    { title: "Groups", icon: <Users className="w-4 h-4 mr-2" />, path: "/groups" },
+  ];
+
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -65,31 +73,21 @@ export function Navbar() {
         </Link>
         
         {currentUser ? (
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/dashboard"
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/explore"
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-            >
-              Explore
-            </Link>
-            <Link
-              to="/create-trip"
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-            >
-              Plan Trip
-            </Link>
-            <Link
-              to="/groups"
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-            >
-              Groups
-            </Link>
+          <nav className="hidden md:flex items-center space-x-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.title}
+                to={item.path}
+                className={`text-sm font-medium flex items-center ${
+                  location.pathname === item.path 
+                    ? "text-primary" 
+                    : "text-foreground/80 hover:text-primary"
+                } transition-colors`}
+              >
+                {item.icon}
+                <span>{item.title}</span>
+              </Link>
+            ))}
           </nav>
         ) : (
           <nav className="hidden md:flex items-center space-x-8">
@@ -107,6 +105,12 @@ export function Navbar() {
 
         {currentUser ? (
           <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" size="icon" className="relative" asChild>
+              <Link to="/notifications">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full" size="icon">
@@ -118,10 +122,16 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to="/profile">Profile</Link>
+                  <Link to="/profile">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/">
+                    <Home className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
@@ -155,34 +165,32 @@ export function Navbar() {
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md py-4 px-4 border-t border-border animate-fade-in">
           {currentUser ? (
             <nav className="flex flex-col space-y-3">
+              {navItems.map((item) => (
+                <Link
+                  key={item.title}
+                  to={item.path}
+                  className={`text-sm font-medium flex items-center px-4 py-2 rounded-md ${
+                    location.pathname === item.path 
+                      ? "bg-primary/10 text-primary" 
+                      : "hover:bg-muted"
+                  } transition-colors`}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Link>
+              ))}
               <Link
-                to="/dashboard"
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+                to="/notifications"
+                className="text-sm font-medium flex items-center px-4 py-2 rounded-md hover:bg-muted transition-colors"
               >
-                Dashboard
-              </Link>
-              <Link
-                to="/explore"
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
-              >
-                Explore
-              </Link>
-              <Link
-                to="/create-trip"
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
-              >
-                Plan Trip
-              </Link>
-              <Link
-                to="/groups"
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
-              >
-                Groups
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
               </Link>
               <Link
                 to="/profile"
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+                className="text-sm font-medium flex items-center px-4 py-2 rounded-md hover:bg-muted transition-colors"
               >
+                <User className="w-4 h-4 mr-2" />
                 Profile
               </Link>
               <div className="pt-2 border-t border-border">

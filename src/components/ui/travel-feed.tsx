@@ -46,15 +46,22 @@ const TRAVEL_POSTS = [
   },
 ];
 
-export function TravelFeed() {
+interface TravelFeedProps {
+  limit?: number;
+}
+
+export function TravelFeed({ limit }: TravelFeedProps) {
   const { ref, isInView } = useInView();
+  
+  // Filter posts based on limit if provided
+  const displayPosts = limit ? TRAVEL_POSTS.slice(0, limit) : TRAVEL_POSTS;
   
   return (
     <div 
       ref={ref}
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
     >
-      {TRAVEL_POSTS.map((post, index) => (
+      {displayPosts.map((post, index) => (
         <div
           key={post.id}
           className="bg-white rounded-xl border border-border overflow-hidden"
