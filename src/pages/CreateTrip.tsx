@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { Navbar } from "@/components/navbar";
@@ -17,8 +18,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { TripDetailsForm } from "@/components/trip/TripDetailsForm";
 import { ItineraryGenerator } from "@/components/trip/ItineraryGenerator";
 import { GroupCollaboration } from "@/components/trip/GroupCollaboration";
-// Import commented out temporarily
-// import { ExpenseTracker } from "@/components/trip/ExpenseTracker";
+// Import for ExpenseTracker removed completely
 import { toast } from "sonner";
 
 const CreateTrip = () => {
@@ -152,13 +152,7 @@ const CreateTrip = () => {
                   <span className="hidden sm:inline">Group</span>
                   <span className="sm:hidden">Group</span>
                 </TabsTrigger>
-                {/* Expenses tab removed temporarily
-                <TabsTrigger value="expenses" className="flex gap-2 items-center">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="hidden sm:inline">Expenses</span>
-                  <span className="sm:hidden">Budget</span>
-                </TabsTrigger>
-                */}
+                {/* Expenses tab completely removed */}
               </TabsList>
               
               <TabsContent value="details" className="space-y-6">
@@ -184,11 +178,7 @@ const CreateTrip = () => {
                 <GroupCollaboration />
               </TabsContent>
               
-              {/* Expenses tab content removed temporarily
-              <TabsContent value="expenses" className="space-y-6">
-                <ExpenseTracker itinerary={itinerary} budget={tripDetails.budget} />
-              </TabsContent>
-              */}
+              {/* Expenses tab content completely removed */}
             </Tabs>
             
             <div className="mt-8 flex justify-end">
