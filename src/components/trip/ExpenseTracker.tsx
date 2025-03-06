@@ -10,15 +10,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, CreditCard, PlusCircle, Users, PieChart } from "lucide-react";
 import { toast } from "sonner";
 
-export const ExpenseTracker = ({ itinerary, budget }) => {
-  const [expenses, setExpenses] = useState([]);
-  const [newExpense, setNewExpense] = useState({
+type ExpenseType = {
+  id: string;
+  title: string;
+  amount: number;
+  category: string;
+  paidBy: string;
+  day?: number;
+  date?: Date;
+};
+
+type SplitPersonType = {
+  id: number;
+  name: string;
+  email: string;
+  share: boolean;
+};
+
+type ExpenseTrackerProps = {
+  itinerary: any[];
+  budget: number;
+};
+
+export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budget }) => {
+  const [expenses, setExpenses] = useState<ExpenseType[]>([]);
+  const [newExpense, setNewExpense] = useState<{
+    title: string;
+    amount: string;
+    category: string;
+    paidBy: string;
+  }>({
     title: "",
     amount: "",
     category: "accommodation",
     paidBy: "you"
   });
-  const [splitBetween, setSplitBetween] = useState([
+  const [splitBetween, setSplitBetween] = useState<SplitPersonType[]>([
     { id: 1, name: "You", email: "you@example.com", share: true },
     { id: 2, name: "Alex Johnson", email: "alex@example.com", share: true }
   ]);
@@ -26,9 +53,9 @@ export const ExpenseTracker = ({ itinerary, budget }) => {
   // Calculate total from itinerary
   useEffect(() => {
     if (itinerary && itinerary.length > 0) {
-      let itineraryExpenses = [];
+      let itineraryExpenses: ExpenseType[] = [];
       itinerary.forEach((day) => {
-        day.activities.forEach((activity) => {
+        day.activities.forEach((activity: any) => {
           if (activity.cost > 0) {
             itineraryExpenses.push({
               id: activity.id,
@@ -49,14 +76,14 @@ export const ExpenseTracker = ({ itinerary, budget }) => {
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
   const budgetProgress = budget > 0 ? (totalExpenses / budget) * 100 : 0;
   
-  const handleAddExpense = (e) => {
+  const handleAddExpense = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newExpense.title || !newExpense.amount) {
       toast.error("Please fill in all required fields");
       return;
     }
     
-    const newExpenseItem = {
+    const newExpenseItem: ExpenseType = {
       id: `expense-${Date.now()}`,
       ...newExpense,
       amount: Number(newExpense.amount),
@@ -75,7 +102,7 @@ export const ExpenseTracker = ({ itinerary, budget }) => {
   };
   
   // Group expenses by category for summary
-  const expensesByCategory = expenses.reduce((acc, expense) => {
+  const expensesByCategory = expenses.reduce<Record<string, number>>((acc, expense) => {
     const category = expense.category || "other";
     if (!acc[category]) {
       acc[category] = 0;
