@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { Navbar } from "@/components/navbar";
@@ -18,11 +17,10 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { TripDetailsForm } from "@/components/trip/TripDetailsForm";
 import { ItineraryGenerator } from "@/components/trip/ItineraryGenerator";
 import { GroupCollaboration } from "@/components/trip/GroupCollaboration";
-// Import for ExpenseTracker removed completely
 import { toast } from "sonner";
 
 const CreateTrip = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [currentTab, setCurrentTab] = useState("details");
   const [tripDetails, setTripDetails] = useState({
     destination: "",
@@ -35,6 +33,14 @@ const CreateTrip = () => {
   const [itinerary, setItinerary] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   const handleTripDetailsChange = (details) => {
     setTripDetails(details);
@@ -118,94 +124,87 @@ const CreateTrip = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <SignedIn>
-        <div className="min-h-screen bg-background">
-          <Navbar />
+        <Navbar />
+        <main className="container mx-auto px-4 py-12 max-w-6xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Plan a New Trip</h1>
+            <p className="text-muted-foreground">
+              Fill in the details below and get AI-powered suggestions for your next adventure.
+            </p>
+          </div>
           
-          <main className="container mx-auto px-4 py-12 max-w-6xl">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2">Plan a New Trip</h1>
-              <p className="text-muted-foreground">
-                Fill in the details below and get AI-powered suggestions for your next adventure.
-              </p>
-            </div>
+          <Tabs 
+            value={currentTab} 
+            onValueChange={setCurrentTab}
+            className="space-y-6"
+          >
+            <TabsList className="grid grid-cols-3 w-full max-w-2xl mx-auto">
+              <TabsTrigger value="details" className="flex gap-2 items-center">
+                <Map className="h-4 w-4" />
+                <span className="hidden sm:inline">Trip Details</span>
+                <span className="sm:hidden">Details</span>
+              </TabsTrigger>
+              <TabsTrigger value="itinerary" className="flex gap-2 items-center">
+                <Clock className="h-4 w-4" />
+                <span className="hidden sm:inline">Itinerary</span>
+                <span className="sm:hidden">Plan</span>
+              </TabsTrigger>
+              <TabsTrigger value="collaboration" className="flex gap-2 items-center">
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Group</span>
+                <span className="sm:hidden">Group</span>
+              </TabsTrigger>
+            </TabsList>
             
-            <Tabs 
-              value={currentTab} 
-              onValueChange={setCurrentTab}
-              className="space-y-6"
+            <TabsContent value="details" className="space-y-6">
+              <TripDetailsForm 
+                tripDetails={tripDetails}
+                onChange={handleTripDetailsChange}
+                onGenerateItinerary={handleGenerateItinerary}
+                isGenerating={isGenerating}
+              />
+            </TabsContent>
+            
+            <TabsContent value="itinerary" className="space-y-6">
+              <ItineraryGenerator 
+                itinerary={itinerary}
+                setItinerary={setItinerary}
+                destination={tripDetails.destination}
+                isGenerating={isGenerating}
+                onGenerate={handleGenerateItinerary}
+              />
+            </TabsContent>
+            
+            <TabsContent value="collaboration" className="space-y-6">
+              <GroupCollaboration />
+            </TabsContent>
+          </Tabs>
+          
+          <div className="mt-8 flex justify-end">
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting}
+              className="w-full sm:w-auto"
             >
-              <TabsList className="grid grid-cols-3 w-full max-w-2xl mx-auto">
-                <TabsTrigger value="details" className="flex gap-2 items-center">
-                  <Map className="h-4 w-4" />
-                  <span className="hidden sm:inline">Trip Details</span>
-                  <span className="sm:hidden">Details</span>
-                </TabsTrigger>
-                <TabsTrigger value="itinerary" className="flex gap-2 items-center">
-                  <Clock className="h-4 w-4" />
-                  <span className="hidden sm:inline">Itinerary</span>
-                  <span className="sm:hidden">Plan</span>
-                </TabsTrigger>
-                <TabsTrigger value="collaboration" className="flex gap-2 items-center">
-                  <UserPlus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Group</span>
-                  <span className="sm:hidden">Group</span>
-                </TabsTrigger>
-                {/* Expenses tab completely removed */}
-              </TabsList>
-              
-              <TabsContent value="details" className="space-y-6">
-                <TripDetailsForm 
-                  tripDetails={tripDetails}
-                  onChange={handleTripDetailsChange}
-                  onGenerateItinerary={handleGenerateItinerary}
-                  isGenerating={isGenerating}
-                />
-              </TabsContent>
-              
-              <TabsContent value="itinerary" className="space-y-6">
-                <ItineraryGenerator 
-                  itinerary={itinerary}
-                  setItinerary={setItinerary}
-                  destination={tripDetails.destination}
-                  isGenerating={isGenerating}
-                  onGenerate={handleGenerateItinerary}
-                />
-              </TabsContent>
-              
-              <TabsContent value="collaboration" className="space-y-6">
-                <GroupCollaboration />
-              </TabsContent>
-              
-              {/* Expenses tab content completely removed */}
-            </Tabs>
-            
-            <div className="mt-8 flex justify-end">
-              <Button 
-                onClick={handleSubmit} 
-                disabled={isSubmitting}
-                className="w-full sm:w-auto"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving Trip...
-                  </>
-                ) : (
-                  "Save Trip"
-                )}
-              </Button>
-            </div>
-          </main>
-          
-          <Footer />
-        </div>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving Trip...
+                </>
+              ) : (
+                "Save Trip"
+              )}
+            </Button>
+          </div>
+        </main>
+        <Footer />
       </SignedIn>
       <SignedOut>
         <RedirectToSignIn />
       </SignedOut>
-    </>
+    </div>
   );
 };
 
