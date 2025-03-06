@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import CreateTrip from "./pages/CreateTrip";
 import Community from "./pages/Community";
 import Groups from "./pages/Groups";
+import GroupChat from "./pages/GroupChat";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import { ClerkProvider } from "@clerk/clerk-react";
@@ -58,6 +59,11 @@ const AppContent = () => {
         <Route path="/groups" element={
           <ProtectedRoute>
             <Groups />
+          </ProtectedRoute>
+        } />
+        <Route path="/group-chat/:groupId" element={
+          <ProtectedRoute>
+            <GroupChat />
           </ProtectedRoute>
         } />
         <Route path="/notifications" element={
