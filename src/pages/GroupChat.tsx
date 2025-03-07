@@ -7,13 +7,11 @@ import { Footer } from "@/components/ui/footer";
 import { ChatRoom } from "@/components/chat/ChatRoom";
 
 const GroupChat = () => {
-  const { currentUser } = useAuth();
-  
   return (
     <div className="min-h-screen bg-background">
       <SignedIn>
         <Navbar />
-        <main className="container mx-auto mt-16">
+        <main className="container mx-auto p-4 mt-16">
           <ChatRoom />
         </main>
         <Footer />

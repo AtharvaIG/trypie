@@ -12,6 +12,15 @@ interface MessageInputProps {
   groupId: string;
 }
 
+// Define the message data type to include imageUrl
+type MessageData = {
+  text: string;
+  senderId: string;
+  senderName: string;
+  timestamp: number;
+  imageUrl?: string;
+};
+
 export const MessageInput: React.FC<MessageInputProps> = ({ groupId }) => {
   const { currentUser } = useAuth();
   const [message, setMessage] = useState("");
@@ -38,7 +47,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ groupId }) => {
       const messageRef = push(ref(database, `messages/${groupId}`));
       
       // Prepare message data
-      const messageData = {
+      const messageData: MessageData = {
         text: message.trim(),
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",

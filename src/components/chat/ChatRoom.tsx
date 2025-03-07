@@ -8,6 +8,7 @@ import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users } from "lucide-react";
+import { toast } from "sonner";
 
 type GroupData = {
   id: string;
