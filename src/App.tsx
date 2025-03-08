@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,6 +58,11 @@ const AppContent = () => {
         <Route path="/groups" element={
           <ProtectedRoute>
             <Groups />
+          </ProtectedRoute>
+        } />
+        <Route path="/group-chat" element={
+          <ProtectedRoute>
+            <GroupChat />
           </ProtectedRoute>
         } />
         <Route path="/group-chat/:groupId" element={
