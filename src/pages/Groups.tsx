@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { Users, Plus, MessageSquare, Clock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { ref, set, push, onValue, off } from "firebase/database";
+import { ref, set, push, onValue, off, get } from "firebase/database";
 import { database } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -22,6 +22,34 @@ type Group = {
   previewMembers: string[];
 };
 
+// Sample group data for initial setup
+const sampleGroups = [
+  {
+    name: "European Adventure 2023",
+    members: 4,
+    createdBy: "system",
+    createdAt: Date.now() - 86400000 * 7, // 7 days ago
+    lastActivity: '2 days ago',
+    previewMembers: ['A', 'B', 'C', 'D']
+  },
+  {
+    name: "Beach Weekend Getaway",
+    members: 3,
+    createdBy: "system",
+    createdAt: Date.now() - 86400000 * 3, // 3 days ago
+    lastActivity: '12 hours ago',
+    previewMembers: ['E', 'F', 'G']
+  },
+  {
+    name: "Hiking Trip Planning",
+    members: 2,
+    createdBy: "system",
+    createdAt: Date.now() - 86400000, // 1 day ago
+    lastActivity: 'Just now',
+    previewMembers: ['H', 'I']
+  }
+];
+
 const Groups = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -31,10 +59,30 @@ const Groups = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   
+  // Function to create sample groups if none exist
+  const createSampleGroupsIfNeeded = async () => {
+    if (!currentUser) return;
+    
+    const groupsRef = ref(database, 'groups');
+    const snapshot = await get(groupsRef);
+    
+    if (!snapshot.exists()) {
+      // No groups exist, create sample groups
+      for (const group of sampleGroups) {
+        const newGroupRef = push(groupsRef);
+        await set(newGroupRef, group);
+      }
+      toast.success("Sample groups created for demonstration");
+    }
+  };
+  
   useEffect(() => {
     if (!currentUser) return;
     
     const groupsRef = ref(database, 'groups');
+    
+    // Create sample groups if needed
+    createSampleGroupsIfNeeded();
     
     // Listen for groups data
     onValue(groupsRef, (snapshot) => {
@@ -50,7 +98,7 @@ const Groups = () => {
             name: group.name,
             members: group.members || 0,
             lastActivity: group.lastActivity || 'Never',
-            previewMembers: ['A', 'B'].slice(0, group.members)
+            previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members)
           });
         });
       }
