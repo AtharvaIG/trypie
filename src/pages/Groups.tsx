@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
-import { Users, Plus, MessageSquare, Clock, X } from "lucide-react";
+import { Users, Plus, MessageSquare, Clock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { ref, set, push, onValue, off } from "firebase/database";
 import { database } from "@/lib/firebase";
@@ -214,15 +214,17 @@ const Groups = () => {
               ))}
             </div>
           ) : (
-            <Card className="p-8 text-center">
+            <Card className="p-8 text-center border-dashed border-2">
               <div className="flex flex-col items-center">
-                <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <h4 className="text-lg font-medium mb-2">No groups yet</h4>
-                <p className="text-muted-foreground mb-4">
-                  Create a group to plan trips with friends and family.
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+                <h4 className="text-xl font-medium mb-2">Make Your First Group</h4>
+                <p className="text-muted-foreground mb-6 max-w-md">
+                  Create a group to plan trips, chat with friends, and share expenses with your travel companions.
                 </p>
-                <Button onClick={() => setIsDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={() => setIsDialogOpen(true)} size="lg" className="gap-2">
+                  <Plus className="h-5 w-5" />
                   Create New Group
                 </Button>
               </div>
