@@ -25,7 +25,7 @@ const Index = () => {
                   Start Your Travel Journey
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-md">
-                  Create your account to unlock all features and start planning your next adventure with Wanderly.
+                  Create your account to unlock all features and start planning your next adventure with TryPie.
                 </p>
                 <ul className="space-y-3">
                   {[

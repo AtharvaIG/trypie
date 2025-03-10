@@ -9,7 +9,7 @@ export function Logo() {
       className="flex items-center space-x-2"
     >
       <span className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-        Wanderly
+        TryPie
       </span>
     </Link>
   );

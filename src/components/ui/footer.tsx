@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -10,11 +9,11 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block mb-4">
               <span className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-                Wanderly
+                TryPie
               </span>
             </Link>
             <p className="text-muted-foreground max-w-md mb-6">
-              Wanderly is a travel planning platform that helps you discover, plan, and share memorable experiences with friends and fellow travelers.
+              TryPie is a travel planning platform that helps you discover, plan, and share memorable experiences with friends and fellow travelers.
             </p>
             <div className="flex space-x-4">
               {["facebook", "twitter", "instagram", "linkedin"].map((social) => (
@@ -74,7 +73,7 @@ export function Footer() {
         
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Wanderly. All rights reserved.
+            &copy; {new Date().getFullYear()} TryPie. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex space-x-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
