@@ -69,21 +69,25 @@ export function MobileMenu() {
         </nav>
       ) : (
         <nav className="flex flex-col space-y-3">
-          {["Features", "About", "Contact"].map((item) => (
-            <Link
-              key={item}
-              to={`#${item.toLowerCase()}`}
+          {[
+            { name: "Features", href: "#features" },
+            { name: "About", href: "#about" },
+            { name: "Contact", href: "#contact" }
+          ].map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
               className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
             >
-              {item}
-            </Link>
+              {item.name}
+            </a>
           ))}
           <div className="flex flex-col space-y-2 pt-2 border-t border-border">
             <Button variant="ghost" className="justify-start" asChild>
-              <Link to="/#login">Log in</Link>
+              <Link to="/login">Log in</Link>
             </Button>
             <Button className="w-full" asChild>
-              <Link to="/#register">Sign up</Link>
+              <Link to="/signup">Sign up</Link>
             </Button>
           </div>
         </nav>

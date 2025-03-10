@@ -21,15 +21,15 @@ const Index = () => {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="#features" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Features
-            </Link>
-            <Link to="#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            </a>
+            <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               About
-            </Link>
-            <Link to="#contact" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            </a>
+            <a href="#contact" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Contact
-            </Link>
+            </a>
           </nav>
           
           <div className="flex items-center space-x-4">
@@ -44,7 +44,9 @@ const Index = () => {
       </header>
       
       <HeroSection />
-      <FeatureSection />
+      <section id="features">
+        <FeatureSection />
+      </section>
       
       <section id="sign-up" className="py-20 md:py-32">
         <div className="container mx-auto px-4">
