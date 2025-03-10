@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { ChatRoom } from "@/components/chat/ChatRoom";
 import { useParams, useNavigate } from "react-router-dom";
@@ -18,8 +17,7 @@ const GroupChat = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto p-4 mt-16">
+      <main className="container mx-auto p-4 mt-20">
         {groupId ? (
           <>
             <div className="mb-4">

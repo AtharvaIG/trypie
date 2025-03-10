@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -180,8 +179,6 @@ const Groups = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-8 mt-20">
         <section className="mb-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { useUser, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
-import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,8 +126,7 @@ const CreateTrip = () => {
   return (
     <div className="min-h-screen bg-background">
       <SignedIn>
-        <Navbar />
-        <main className="container mx-auto px-4 py-12 max-w-6xl">
+        <main className="container mx-auto px-4 py-12 mt-20 max-w-6xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Plan a New Trip</h1>
             <p className="text-muted-foreground">

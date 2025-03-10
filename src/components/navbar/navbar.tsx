@@ -28,6 +28,9 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Check if we're on the landing page
+  const isLandingPage = location.pathname === "/";
+
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -39,7 +42,7 @@ export function Navbar() {
         
         {currentUser ? (
           <DesktopNav />
-        ) : (
+        ) : isLandingPage ? (
           <div className="hidden md:flex items-center space-x-8">
             {["Features", "About", "Contact"].map((item) => (
               <a
@@ -51,17 +54,23 @@ export function Navbar() {
               </a>
             ))}
           </div>
-        )}
+        ) : null}
 
         {currentUser ? (
           <UserMenu />
-        ) : (
+        ) : isLandingPage ? (
           <div className="hidden md:flex items-center space-x-4">
-            <a href="/#login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            <a href="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Log in
             </a>
-            <a href="/#register" className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+            <a href="/signup" className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
               Sign up
+            </a>
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center space-x-4">
+            <a href="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Home
             </a>
           </div>
         )}
