@@ -1,15 +1,48 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/ui/hero-section";
 import { FeatureSection } from "@/components/ui/feature-section";
 import { AuthForm } from "@/components/ui/auth-form";
 import { Footer } from "@/components/ui/footer";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <Navbar />
+      <header className="py-4 px-4 md:px-8 border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link to="/" className="flex items-center space-x-2">
+            <span className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+              TryPie
+            </span>
+          </Link>
+          
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link to="#features" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Features
+            </Link>
+            <Link to="#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              About
+            </Link>
+            <Link to="#contact" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Contact
+            </Link>
+          </nav>
+          
+          <div className="flex items-center space-x-4">
+            <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Log in
+            </Link>
+            <Button size="sm" asChild>
+              <Link to="/signup">Sign up</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+      
       <HeroSection />
       <FeatureSection />
       
