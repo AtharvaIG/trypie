@@ -43,7 +43,7 @@ export function UserMenu() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full" size="icon">
             <Avatar>
-              <AvatarImage src={currentUser.photoURL || undefined} alt="Profile" />
+              <AvatarImage src={currentUser?.photoURL || undefined} alt="Profile" />
               <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
           </Button>
@@ -56,7 +56,7 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/">
+            <Link to="/dashboard">
               <Home className="h-4 w-4 mr-2" />
               Dashboard
             </Link>

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { MobileMenu } from "./mobile-menu";
 import { DesktopNav } from "./desktop-nav";
@@ -60,18 +60,18 @@ export function Navbar() {
           <UserMenu />
         ) : isLandingPage ? (
           <div className="hidden md:flex items-center space-x-4">
-            <a href="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Log in
-            </a>
-            <a href="/signup" className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+            </Link>
+            <Link to="/signup" className="text-sm px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
               Sign up
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="hidden md:flex items-center space-x-4">
-            <a href="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            <Link to="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Home
-            </a>
+            </Link>
           </div>
         )}
         

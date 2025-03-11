@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Navbar } from "@/components/navbar";
+import { useAuth } from "@/contexts/AuthContext";
 import { HeroSection } from "@/components/ui/hero-section";
 import { FeatureSection } from "@/components/ui/feature-section";
 import { AuthForm } from "@/components/ui/auth-form";
@@ -10,39 +10,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 const Index = () => {
+  const { currentUser } = useAuth();
+  
   return (
     <div className="min-h-screen">
-      <header className="py-4 px-4 md:px-8 border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-              TryPie
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              Features
-            </a>
-            <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              About
-            </a>
-            <a href="#contact" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              Contact
-            </a>
-          </nav>
-          
-          <div className="flex items-center space-x-4">
-            <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              Log in
-            </Link>
-            <Button size="sm" asChild>
-              <Link to="/signup">Sign up</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-      
       <HeroSection />
       <section id="features">
         <FeatureSection />
@@ -79,12 +50,50 @@ const Index = () => {
                     </li>
                   ))}
                 </ul>
+                
+                {currentUser ? (
+                  <Button size="lg" asChild>
+                    <Link to="/dashboard">
+                      Go to Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" asChild>
+                    <Link to="/signup">
+                      Create Account
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                )}
               </div>
               
               <div>
-                <AuthForm type="register" />
+                {!currentUser && <AuthForm type="register" />}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+      
+      <section id="about" className="py-20 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">About TryPie</h2>
+            <p className="text-lg text-muted-foreground">
+              We're passionate about making travel planning easier and more enjoyable for everyone.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      <section id="contact" className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Get in Touch</h2>
+            <p className="text-lg text-muted-foreground">
+              Have questions or suggestions? We'd love to hear from you!
+            </p>
           </div>
         </div>
       </section>

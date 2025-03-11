@@ -69,19 +69,21 @@ export function MobileMenu() {
         </nav>
       ) : (
         <nav className="flex flex-col space-y-3">
-          {[
-            { name: "Features", href: "#features" },
-            { name: "About", href: "#about" },
-            { name: "Contact", href: "#contact" }
-          ].map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
-            >
-              {item.name}
-            </a>
-          ))}
+          {location.pathname === "/" && 
+            [
+              { name: "Features", href: "#features" },
+              { name: "About", href: "#about" },
+              { name: "Contact", href: "#contact" }
+            ].map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+              >
+                {item.name}
+              </a>
+            ))
+          }
           <div className="flex flex-col space-y-2 pt-2 border-t border-border">
             <Button variant="ghost" className="justify-start" asChild>
               <Link to="/login">Log in</Link>
