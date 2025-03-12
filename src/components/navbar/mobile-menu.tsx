@@ -25,6 +25,11 @@ export function MobileMenu() {
     { title: "Groups", icon: <Users className="w-4 h-4 mr-2" />, path: "/groups" },
   ];
 
+  // Check if we're on the landing page
+  const isLandingPage = location.pathname === "/";
+  // Check if we're on login or signup pages
+  const isAuthPage = ["/login", "/signup"].includes(location.pathname);
+
   return (
     <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md py-4 px-4 border-t border-border animate-fade-in">
       {currentUser ? (
@@ -67,23 +72,56 @@ export function MobileMenu() {
             </Button>
           </div>
         </nav>
+      ) : isLandingPage ? (
+        <nav className="flex flex-col space-y-3">
+          {[
+            { name: "Features", href: "#features" },
+            { name: "About", href: "#about" },
+            { name: "Contact", href: "#contact" }
+          ].map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+            >
+              {item.name}
+            </a>
+          ))}
+          <div className="flex flex-col space-y-2 pt-2 border-t border-border">
+            <Button variant="ghost" className="justify-start" asChild>
+              <Link to="/login">Log in</Link>
+            </Button>
+            <Button className="w-full" asChild>
+              <Link to="/signup">Sign up</Link>
+            </Button>
+          </div>
+        </nav>
+      ) : isAuthPage ? (
+        <nav className="flex flex-col space-y-3">
+          <Link 
+            to="/"
+            className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+          >
+            Home
+          </Link>
+          {location.pathname === "/login" ? (
+            <Button className="w-full" asChild>
+              <Link to="/signup">Sign up</Link>
+            </Button>
+          ) : (
+            <Button className="w-full" asChild>
+              <Link to="/login">Log in</Link>
+            </Button>
+          )}
+        </nav>
       ) : (
         <nav className="flex flex-col space-y-3">
-          {location.pathname === "/" && 
-            [
-              { name: "Features", href: "#features" },
-              { name: "About", href: "#about" },
-              { name: "Contact", href: "#contact" }
-            ].map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
-              >
-                {item.name}
-              </a>
-            ))
-          }
+          <Link 
+            to="/"
+            className="text-sm font-medium px-4 py-2 rounded-md hover:bg-muted transition-colors"
+          >
+            Home
+          </Link>
           <div className="flex flex-col space-y-2 pt-2 border-t border-border">
             <Button variant="ghost" className="justify-start" asChild>
               <Link to="/login">Log in</Link>

@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/navbar";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import CreateTrip from "./pages/CreateTrip";
@@ -25,17 +27,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (loading) return <div>Loading...</div>;
   
-  return currentUser ? <>{children}</> : <Navigate to="/" />;
+  return currentUser ? <>{children}</> : <Navigate to="/login" />;
 };
 
 const AppContent = () => {
-  const { currentUser } = useAuth();
-  
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />

@@ -30,6 +30,8 @@ export function Navbar() {
 
   // Check if we're on the landing page
   const isLandingPage = location.pathname === "/";
+  // Check if we're on login or signup pages
+  const isAuthPage = ["/login", "/signup"].includes(location.pathname);
 
   return (
     <header 
@@ -67,10 +69,19 @@ export function Navbar() {
               Sign up
             </Link>
           </div>
+        ) : isAuthPage ? (
+          <div className="hidden md:flex items-center space-x-4">
+            <Link to="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Home
+            </Link>
+          </div>
         ) : (
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Home
+            </Link>
+            <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Log in
             </Link>
           </div>
         )}
