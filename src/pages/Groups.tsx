@@ -152,6 +152,11 @@ const Groups = () => {
       
       // Generate a new group reference
       const groupRef = push(ref(database, 'groups'));
+      const groupId = groupRef.key;
+      
+      if (!groupId) {
+        throw new Error("Failed to generate group ID");
+      }
       
       // Initial members list with the creator
       const membersList: {[key: string]: boolean} = {};
@@ -183,7 +188,14 @@ const Groups = () => {
       // Close the dialog and reset
       setIsDialogOpen(false);
       setNewGroupName("");
+      
+      // Show success message and direct user to the chat for the new group
       toast.success("Group created successfully!");
+      
+      // Slight delay to ensure the database has updated
+      setTimeout(() => {
+        navigate(`/group-chat/${groupId}`);
+      }, 500);
       
     } catch (error) {
       console.error("Error creating group:", error);
@@ -237,7 +249,10 @@ const Groups = () => {
                 Plan, chat, and share expenses with your travel companions.
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) setIsCreating(false);
+            }}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -259,6 +274,11 @@ const Groups = () => {
                         placeholder="Enter group name"
                         value={newGroupName}
                         onChange={(e) => setNewGroupName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newGroupName.trim()) {
+                            handleCreateGroup();
+                          }
+                        }}
                       />
                     </div>
                   </div>

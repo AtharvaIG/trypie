@@ -15,12 +15,19 @@ import CreateTrip from "./pages/CreateTrip";
 import Community from "./pages/Community";
 import Groups from "./pages/Groups";
 import GroupChat from "./pages/GroupChat";
+import JoinGroup from "./pages/JoinGroup";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import { ClerkProvider } from "@clerk/clerk-react";
-import JoinGroup from "./pages/JoinGroup";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -113,7 +120,7 @@ const App = () => (
       <TooltipProvider>
         <AuthProvider>
           <Toaster />
-          <Sonner position="top-right" />
+          <Sonner position="top-right" className="z-50" toastOptions={{ duration: 3000 }} />
           <AppContent />
         </AuthProvider>
       </TooltipProvider>
