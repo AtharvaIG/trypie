@@ -1,14 +1,14 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Plane, Camera, Users } from "lucide-react";
+import { LayoutDashboard, Plane, Camera, Users } from "lucide-react";
 
 export function DesktopNav() {
   const location = useLocation();
   
-  // Navigation items
+  // Navigation items - Updated Home icon to Dashboard and changed the path
   const navItems = [
-    { title: "Home", icon: <Home className="w-4 h-4 mr-2" />, path: "/" },
+    { title: "Dashboard", icon: <LayoutDashboard className="w-4 h-4 mr-2" />, path: "/dashboard" },
     { title: "Plan Trip", icon: <Plane className="w-4 h-4 mr-2" />, path: "/create-trip" },
     { title: "Community", icon: <Camera className="w-4 h-4 mr-2" />, path: "/community" },
     { title: "Groups", icon: <Users className="w-4 h-4 mr-2" />, path: "/groups" },

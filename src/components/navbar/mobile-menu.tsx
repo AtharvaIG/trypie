@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Bell, User, Home, Plane, Camera, Users } from "lucide-react";
+import { Bell, User, LayoutDashboard, Plane, Camera, Users } from "lucide-react";
 
 export function MobileMenu() {
   const { currentUser, logout } = useAuth();
@@ -17,9 +17,9 @@ export function MobileMenu() {
     }
   };
   
-  // Navigation items
+  // Navigation items - Updated to match desktop nav
   const navItems = [
-    { title: "Home", icon: <Home className="w-4 h-4 mr-2" />, path: "/" },
+    { title: "Dashboard", icon: <LayoutDashboard className="w-4 h-4 mr-2" />, path: "/dashboard" },
     { title: "Plan Trip", icon: <Plane className="w-4 h-4 mr-2" />, path: "/create-trip" },
     { title: "Community", icon: <Camera className="w-4 h-4 mr-2" />, path: "/community" },
     { title: "Groups", icon: <Users className="w-4 h-4 mr-2" />, path: "/groups" },

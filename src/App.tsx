@@ -30,12 +30,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return currentUser ? <>{children}</> : <Navigate to="/login" />;
 };
 
+// HomeRoute that redirects to dashboard if logged in
+const HomeRoute = () => {
+  const { currentUser, loading } = useAuth();
+  
+  if (loading) return <div>Loading...</div>;
+  
+  return currentUser ? <Navigate to="/dashboard" /> : <Index />;
+};
+
 const AppContent = () => {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<HomeRoute />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={
