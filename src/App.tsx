@@ -18,6 +18,7 @@ import GroupChat from "./pages/GroupChat";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import { ClerkProvider } from "@clerk/clerk-react";
+import JoinGroup from "./pages/JoinGroup";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,11 @@ const AppContent = () => {
         <Route path="/group-chat/:groupId" element={
           <ProtectedRoute>
             <GroupChat />
+          </ProtectedRoute>
+        } />
+        <Route path="/join-group/:groupId" element={
+          <ProtectedRoute>
+            <JoinGroup />
           </ProtectedRoute>
         } />
         <Route path="/notifications" element={

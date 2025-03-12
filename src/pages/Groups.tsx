@@ -6,12 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
-import { Users, Plus, MessageSquare, Clock } from "lucide-react";
+import { Users, Plus, MessageSquare, Clock, UserPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { ref, set, push, onValue, off, get } from "firebase/database";
+import { ref, set, push, onValue, off, get, update } from "firebase/database";
 import { database } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { GroupMembersList } from "@/components/group/GroupMembersList";
+import { InviteMembers } from "@/components/group/InviteMembers";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 
 type Group = {
   id: string;
@@ -19,6 +23,8 @@ type Group = {
   members: number;
   lastActivity: string;
   previewMembers: string[];
+  createdBy: string;
+  membersList?: {[key: string]: boolean};
 };
 
 // Sample group data for initial setup
@@ -29,7 +35,8 @@ const sampleGroups = [
     createdBy: "system",
     createdAt: Date.now() - 86400000 * 7, // 7 days ago
     lastActivity: '2 days ago',
-    previewMembers: ['A', 'B', 'C', 'D']
+    previewMembers: ['A', 'B', 'C', 'D'],
+    membersList: { system: true }
   },
   {
     name: "Beach Weekend Getaway",
@@ -37,7 +44,8 @@ const sampleGroups = [
     createdBy: "system",
     createdAt: Date.now() - 86400000 * 3, // 3 days ago
     lastActivity: '12 hours ago',
-    previewMembers: ['E', 'F', 'G']
+    previewMembers: ['E', 'F', 'G'],
+    membersList: { system: true }
   },
   {
     name: "Hiking Trip Planning",
@@ -45,7 +53,8 @@ const sampleGroups = [
     createdBy: "system",
     createdAt: Date.now() - 86400000, // 1 day ago
     lastActivity: 'Just now',
-    previewMembers: ['H', 'I']
+    previewMembers: ['H', 'I'],
+    membersList: { system: true }
   }
 ];
 
@@ -57,6 +66,8 @@ const Groups = () => {
   const [newGroupName, setNewGroupName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [activeTab, setActiveTab] = useState("details");
   
   // Function to create sample groups if none exist
   const createSampleGroupsIfNeeded = async () => {
@@ -97,7 +108,9 @@ const Groups = () => {
             name: group.name,
             members: group.members || 0,
             lastActivity: group.lastActivity || 'Never',
-            previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members)
+            previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
+            createdBy: group.createdBy,
+            membersList: group.membersList || {}
           });
         });
       }
@@ -129,13 +142,19 @@ const Groups = () => {
       // Generate a new group reference
       const groupRef = push(ref(database, 'groups'));
       
+      // Initial members list with the creator
+      const membersList: {[key: string]: boolean} = {};
+      membersList[currentUser.uid] = true;
+      
       // Group data
       const groupData = {
         name: newGroupName.trim(),
         createdBy: currentUser.uid,
         createdAt: Date.now(),
         members: 1,
-        lastActivity: 'Just now'
+        lastActivity: 'Just now',
+        membersList: membersList,
+        previewMembers: [currentUser.displayName?.charAt(0) || 'U']
       };
       
       // Save the group
@@ -156,6 +175,16 @@ const Groups = () => {
   
   const handleJoinChat = (groupId: string) => {
     navigate(`/group-chat/${groupId}`);
+  };
+
+  const handleManageGroup = (group: Group) => {
+    setSelectedGroup(group);
+    setActiveTab("details");
+  };
+
+  const handleInviteUsers = (group: Group) => {
+    setSelectedGroup(group);
+    setActiveTab("invite");
   };
 
   // Component to show when there are no groups
@@ -202,9 +231,9 @@ const Groups = () => {
                 <div className="py-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label htmlFor="group-name" className="text-sm font-medium">
+                      <Label htmlFor="group-name">
                         Group Name
-                      </label>
+                      </Label>
                       <Input
                         id="group-name"
                         placeholder="Enter group name"
@@ -242,15 +271,26 @@ const Groups = () => {
                 <Card key={group.id} className="p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-lg">{group.name}</h3>
-                    <Button 
-                      variant="secondary" 
-                      size="sm" 
-                      className="h-8 flex items-center"
-                      onClick={() => handleJoinChat(group.id)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-1" />
-                      Chat
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 flex items-center"
+                        onClick={() => handleInviteUsers(group)}
+                      >
+                        <UserPlus className="h-4 w-4 mr-1" />
+                        Invite
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="h-8 flex items-center"
+                        onClick={() => handleJoinChat(group.id)}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        Chat
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -264,10 +304,15 @@ const Groups = () => {
                       ))}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      <p className="flex items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 p-0 text-xs"
+                        onClick={() => handleManageGroup(group)}
+                      >
                         <Users className="h-3 w-3 mr-1" />
                         {group.members} members
-                      </p>
+                      </Button>
                       <p className="flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
                         Active {group.lastActivity}
@@ -281,6 +326,41 @@ const Groups = () => {
             <NoGroupsMessage />
           )}
         </section>
+
+        {/* Group management dialog */}
+        {selectedGroup && (
+          <Dialog open={!!selectedGroup} onOpenChange={(open) => !open && setSelectedGroup(null)}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{selectedGroup.name}</DialogTitle>
+              </DialogHeader>
+              
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-2 mb-4">
+                  <TabsTrigger value="details">Group Details</TabsTrigger>
+                  <TabsTrigger value="invite">Invite Members</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="details" className="space-y-4">
+                  <GroupMembersList groupId={selectedGroup.id} />
+                </TabsContent>
+                
+                <TabsContent value="invite" className="space-y-4">
+                  <InviteMembers groupId={selectedGroup.id} groupName={selectedGroup.name} />
+                </TabsContent>
+              </Tabs>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedGroup(null)}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
       
       <Footer />

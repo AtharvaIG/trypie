@@ -2,19 +2,24 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ref, onValue, off } from "firebase/database";
+import { ref, onValue, off, get } from "firebase/database";
 import { database } from "@/lib/firebase";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, Users, UserPlus, Info } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { GroupMembersList } from "@/components/group/GroupMembersList";
+import { InviteMembers } from "@/components/group/InviteMembers";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type GroupData = {
   id: string;
   name: string;
   members: number;
   lastActivity?: string;
+  membersList?: {[key: string]: boolean};
 };
 
 export const ChatRoom: React.FC = () => {
@@ -23,6 +28,8 @@ export const ChatRoom: React.FC = () => {
   const navigate = useNavigate();
   const [group, setGroup] = useState<GroupData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("members");
 
   useEffect(() => {
     if (!groupId) return;
@@ -37,8 +44,15 @@ export const ChatRoom: React.FC = () => {
           id: groupId,
           name: data.name,
           members: data.members || 0,
-          lastActivity: data.lastActivity
+          lastActivity: data.lastActivity,
+          membersList: data.membersList
         });
+        
+        // Check if current user is a member
+        if (currentUser && data.membersList && !data.membersList[currentUser.uid]) {
+          toast.error("You are not a member of this group");
+          navigate("/groups");
+        }
       } else {
         // Group doesn't exist
         toast.error("Group not found");
@@ -51,7 +65,7 @@ export const ChatRoom: React.FC = () => {
       // Clean up listener
       off(groupRef);
     };
-  }, [groupId, navigate]);
+  }, [groupId, navigate, currentUser]);
 
   if (loading) {
     return (
@@ -80,6 +94,40 @@ export const ChatRoom: React.FC = () => {
               <span>{group?.members} members</span>
             </div>
           </div>
+        </div>
+        
+        <div className="flex gap-2">
+          <Dialog open={isGroupInfoOpen} onOpenChange={setIsGroupInfoOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8"
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{group?.name}</DialogTitle>
+              </DialogHeader>
+              
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid grid-cols-2 mb-4">
+                  <TabsTrigger value="members">Members</TabsTrigger>
+                  <TabsTrigger value="invite">Invite</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="members">
+                  {group && <GroupMembersList groupId={group.id} />}
+                </TabsContent>
+                
+                <TabsContent value="invite">
+                  {group && <InviteMembers groupId={group.id} groupName={group.name} />}
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       
