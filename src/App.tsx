@@ -26,7 +26,9 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { currentUser, loading } = useAuth();
   
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center min-h-screen">
+    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+  </div>;
   
   return currentUser ? <>{children}</> : <Navigate to="/login" />;
 };
@@ -35,7 +37,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const HomeRoute = () => {
   const { currentUser, loading } = useAuth();
   
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center min-h-screen">
+    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+  </div>;
   
   return currentUser ? <Navigate to="/dashboard" /> : <Index />;
 };
@@ -109,7 +113,7 @@ const App = () => (
       <TooltipProvider>
         <AuthProvider>
           <Toaster />
-          <Sonner />
+          <Sonner position="top-right" />
           <AppContent />
         </AuthProvider>
       </TooltipProvider>

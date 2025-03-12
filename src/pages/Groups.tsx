@@ -73,21 +73,28 @@ const Groups = () => {
   const createSampleGroupsIfNeeded = async () => {
     if (!currentUser) return;
     
-    const groupsRef = ref(database, 'groups');
-    const snapshot = await get(groupsRef);
-    
-    if (!snapshot.exists()) {
-      // No groups exist, create sample groups
-      for (const group of sampleGroups) {
-        const newGroupRef = push(groupsRef);
-        await set(newGroupRef, group);
+    try {
+      const groupsRef = ref(database, 'groups');
+      const snapshot = await get(groupsRef);
+      
+      if (!snapshot.exists()) {
+        // No groups exist, create sample groups
+        for (const group of sampleGroups) {
+          const newGroupRef = push(groupsRef);
+          await set(newGroupRef, group);
+        }
+        toast.success("Sample groups created for demonstration");
       }
-      toast.success("Sample groups created for demonstration");
+    } catch (error) {
+      console.error("Error checking for sample groups:", error);
     }
   };
   
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
     
     const groupsRef = ref(database, 'groups');
     
@@ -95,7 +102,7 @@ const Groups = () => {
     createSampleGroupsIfNeeded();
     
     // Listen for groups data
-    onValue(groupsRef, (snapshot) => {
+    const unsubscribe = onValue(groupsRef, (snapshot) => {
       const data = snapshot.val();
       const groupsList: Group[] = [];
       
@@ -117,6 +124,10 @@ const Groups = () => {
       
       setGroups(groupsList);
       setLoading(false);
+    }, (error) => {
+      console.error("Error fetching groups:", error);
+      setLoading(false);
+      toast.error("Failed to load groups");
     });
     
     return () => {
@@ -146,6 +157,13 @@ const Groups = () => {
       const membersList: {[key: string]: boolean} = {};
       membersList[currentUser.uid] = true;
       
+      // Get first letter of user's email or use 'U' as fallback
+      const userInitial = currentUser.email 
+        ? currentUser.email.charAt(0).toUpperCase() 
+        : (currentUser.displayName 
+          ? currentUser.displayName.charAt(0).toUpperCase() 
+          : 'U');
+      
       // Group data
       const groupData = {
         name: newGroupName.trim(),
@@ -154,8 +172,10 @@ const Groups = () => {
         members: 1,
         lastActivity: 'Just now',
         membersList: membersList,
-        previewMembers: [currentUser.displayName?.charAt(0) || 'U']
+        previewMembers: [userInitial]
       };
+      
+      console.log("Creating group with data:", groupData);
       
       // Save the group
       await set(groupRef, groupData);
@@ -246,7 +266,10 @@ const Groups = () => {
                 <DialogFooter>
                   <Button 
                     variant="outline" 
-                    onClick={() => setIsDialogOpen(false)}
+                    onClick={() => {
+                      setIsDialogOpen(false);
+                      setIsCreating(false);
+                    }}
                   >
                     Cancel
                   </Button>
