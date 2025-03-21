@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, CreditCard, PlusCircle, Users, PieChart } from "lucide-react";
+import { DollarSign, CreditCard, PlusCircle, Users, PieChart, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 
 type ExpenseType = {
@@ -50,7 +49,6 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
     { id: 2, name: "Alex Johnson", email: "alex@example.com", share: true }
   ]);
   
-  // Calculate total from itinerary
   useEffect(() => {
     if (itinerary && itinerary.length > 0) {
       let itineraryExpenses: ExpenseType[] = [];
@@ -101,7 +99,6 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
     toast.success("Expense added successfully");
   };
   
-  // Group expenses by category for summary
   const expensesByCategory = expenses.reduce<Record<string, number>>((acc, expense) => {
     const category = expense.category || "other";
     if (!acc[category]) {
@@ -111,7 +108,6 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
     return acc;
   }, {});
   
-  // Get the color based on budget status
   const getBudgetStatusColor = () => {
     if (budgetProgress >= 100) return "text-destructive";
     if (budgetProgress >= 80) return "text-amber-500";
@@ -123,7 +119,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <DollarSign className="mr-2 h-5 w-5" />
+            <IndianRupee className="mr-2 h-5 w-5" />
             Budget Overview
           </CardTitle>
           <CardDescription>
@@ -135,11 +131,11 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Expenses</p>
-                <p className="text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
+                <p className="text-2xl font-bold">₹{totalExpenses.toFixed(2)}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Budget</p>
-                <p className="text-2xl font-bold">${budget > 0 ? budget.toFixed(2) : "0.00"}</p>
+                <p className="text-2xl font-bold">₹{budget > 0 ? budget.toFixed(2) : "0.00"}</p>
               </div>
             </div>
             
@@ -156,11 +152,11 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                 {budget > 0 ? (
                   totalExpenses > budget ? (
                     <span className="text-destructive">
-                      Over budget by ${(totalExpenses - budget).toFixed(2)}
+                      Over budget by ₹{(totalExpenses - budget).toFixed(2)}
                     </span>
                   ) : (
                     <span className="text-emerald-500">
-                      ${(budget - totalExpenses).toFixed(2)} remaining
+                      ₹{(budget - totalExpenses).toFixed(2)} remaining
                     </span>
                   )
                 ) : (
@@ -179,7 +175,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                     <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
                     <span className="capitalize">{category}</span>
                   </div>
-                  <span>${amount.toFixed(2)}</span>
+                  <span>₹{amount.toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -212,7 +208,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${expense.amount.toFixed(2)}</p>
+                        <p className="font-medium">₹{expense.amount.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">
                           Paid by {expense.paidBy === "you" ? "you" : expense.paidBy}
                         </p>
@@ -241,7 +237,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount ($)</Label>
+                  <Label htmlFor="amount">Amount (₹)</Label>
                   <Input
                     id="amount"
                     type="number"

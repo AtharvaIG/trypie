@@ -6,12 +6,12 @@ import { LayoutDashboard, Plane, Camera, Users } from "lucide-react";
 export function DesktopNav() {
   const location = useLocation();
   
-  // Navigation items - Updated Home icon to Dashboard and changed the path
+  // Navigation items
   const navItems = [
-    { title: "Dashboard", icon: <LayoutDashboard className="w-4 h-4 mr-2" />, path: "/dashboard" },
-    { title: "Plan Trip", icon: <Plane className="w-4 h-4 mr-2" />, path: "/create-trip" },
-    { title: "Community", icon: <Camera className="w-4 h-4 mr-2" />, path: "/community" },
-    { title: "Groups", icon: <Users className="w-4 h-4 mr-2" />, path: "/groups" },
+    { title: "Dashboard", icon: <LayoutDashboard className="h-4 w-4 mr-2" />, path: "/dashboard" },
+    { title: "Plan Trip", icon: <Plane className="h-4 w-4 mr-2" />, path: "/create-trip" },
+    { title: "Community", icon: <Camera className="h-4 w-4 mr-2" />, path: "/community" },
+    { title: "Groups", icon: <Users className="h-4 w-4 mr-2" />, path: "/groups" },
   ];
 
   return (

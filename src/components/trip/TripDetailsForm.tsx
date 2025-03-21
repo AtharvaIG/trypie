@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,7 @@ export const TripDetailsForm = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="budget">Budget (USD)</Label>
+          <Label htmlFor="budget">Budget (INR)</Label>
           <Input 
             id="budget"
             type="number"
