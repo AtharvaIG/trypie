@@ -1,6 +1,5 @@
 
-import React from "react";
-import { useInView, generateStaggerDelay } from "@/lib/animations";
+import React, { memo } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
 
@@ -50,67 +49,66 @@ interface TravelFeedProps {
   limit?: number;
 }
 
+// Memoized TravelPost component to prevent unnecessary re-renders
+const TravelPost = memo(({ post, index }: { post: typeof TRAVEL_POSTS[0], index: number }) => {
+  return (
+    <div
+      key={post.id}
+      className="bg-white rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-md"
+    >
+      <div className="p-4 flex items-center gap-3">
+        <Avatar className="h-9 w-9">
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+            {post.author.avatar}
+          </div>
+        </Avatar>
+        <div>
+          <p className="font-medium text-sm">{post.author.name}</p>
+          <p className="text-xs text-muted-foreground">{post.location}</p>
+        </div>
+      </div>
+      
+      <div className="aspect-w-4 aspect-h-3 relative">
+        <img 
+          src={post.image} 
+          alt={post.caption} 
+          className="w-full h-56 object-cover"
+          loading="lazy" // Add lazy loading for better performance
+        />
+      </div>
+      
+      <div className="p-4">
+        <div className="flex gap-4 mb-3">
+          <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Heart className="h-4 w-4 mr-1" />
+            {post.likes}
+          </button>
+          <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+            <MessageSquare className="h-4 w-4 mr-1" />
+            {post.comments}
+          </button>
+          <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
+        
+        <p className="text-sm mb-1">{post.caption}</p>
+        <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+      </div>
+    </div>
+  );
+});
+
+TravelPost.displayName = 'TravelPost';
+
 export function TravelFeed({ limit }: TravelFeedProps) {
-  const { ref, isInView } = useInView();
-  
-  // Filter posts based on limit if provided
+  // Filter posts based on limit if provided - do this once, not on every render
   const displayPosts = limit ? TRAVEL_POSTS.slice(0, limit) : TRAVEL_POSTS;
   
   return (
-    <div 
-      ref={ref}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {displayPosts.map((post, index) => (
-        <div
-          key={post.id}
-          className="bg-white rounded-xl border border-border overflow-hidden"
-          style={{
-            opacity: isInView ? 1 : 0,
-            transform: isInView ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.5s ease, transform 0.5s ease",
-            transitionDelay: generateStaggerDelay(index),
-          }}
-        >
-          <div className="p-4 flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                {post.author.avatar}
-              </div>
-            </Avatar>
-            <div>
-              <p className="font-medium text-sm">{post.author.name}</p>
-              <p className="text-xs text-muted-foreground">{post.location}</p>
-            </div>
-          </div>
-          
-          <div className="aspect-w-4 aspect-h-3 relative">
-            <img 
-              src={post.image} 
-              alt={post.caption} 
-              className="w-full h-56 object-cover"
-            />
-          </div>
-          
-          <div className="p-4">
-            <div className="flex gap-4 mb-3">
-              <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
-                <Heart className="h-4 w-4 mr-1" />
-                {post.likes}
-              </button>
-              <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
-                <MessageSquare className="h-4 w-4 mr-1" />
-                {post.comments}
-              </button>
-              <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
-                <Share2 className="h-4 w-4" />
-              </button>
-            </div>
-            
-            <p className="text-sm mb-1">{post.caption}</p>
-            <p className="text-xs text-muted-foreground">{post.timestamp}</p>
-          </div>
-        </div>
+        <TravelPost key={post.id} post={post} index={index} />
       ))}
     </div>
   );
