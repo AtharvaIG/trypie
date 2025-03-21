@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Mail, Lock, User } from "lucide-react";
 import { toast } from "sonner";
+import { updateProfile } from "firebase/auth";
 
 interface AuthFormProps {
   type?: "login" | "register";
@@ -58,7 +59,7 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
       
       // Update display name
       if (userCredential.user && (firstName || lastName)) {
-        await userCredential.user.updateProfile({
+        await updateProfile(userCredential.user, {
           displayName: `${firstName} ${lastName}`.trim()
         });
       }

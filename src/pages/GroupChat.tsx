@@ -2,7 +2,7 @@
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/ui/footer";
-import { ChatRoom } from "@/components/chat/ChatRoom";
+import ChatRoomWrapper from "@/components/chat/ChatRoom";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -31,7 +31,7 @@ const GroupChat = () => {
                 Back to Groups
               </Button>
             </div>
-            <ChatRoom />
+            <ChatRoomWrapper />
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-[50vh]">
