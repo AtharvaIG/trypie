@@ -14,9 +14,9 @@ const Community = () => {
       
       <main className="container mx-auto px-4 py-8 mt-20">
         <section className="mb-10">
-          <h2 className="text-3xl font-bold mb-6">Community Travel Experiences</h2>
+          <h2 className="text-3xl font-bold mb-6">Indian Travel Experiences</h2>
           <p className="text-muted-foreground mb-8">
-            Discover and share travel experiences from fellow adventurers around the world.
+            Discover and share travel experiences from fellow adventurers across India's diverse landscapes.
           </p>
           
           <TravelFeed />
