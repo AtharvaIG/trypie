@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,9 +38,9 @@ export const TripDetailsForm = ({
   };
 
   const handleStartDateChange = (date) => {
-    // Don't allow selection of past dates
     const today = startOfDay(new Date());
     
+    // Don't allow selection of past dates
     if (date && isBefore(date, today)) {
       toast.error("Start date cannot be in the past");
       return;
@@ -71,6 +70,13 @@ export const TripDetailsForm = ({
       return;
     }
     
+    // Don't allow selection of past dates
+    const today = startOfDay(new Date());
+    if (date && isBefore(date, today)) {
+      toast.error("End date cannot be in the past");
+      return;
+    }
+
     setDateRange({ ...dateRange, to: date });
     onChange({ ...tripDetails, endDate: date });
   };
