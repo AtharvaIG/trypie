@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 export function UserMenu() {
   const { currentUser, logout } = useAuth();
@@ -19,13 +20,15 @@ export function UserMenu() {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (error) {
+      toast.success("You have been logged out successfully");
+    } catch (error: any) {
       console.error("Failed to log out", error);
+      toast.error(`Failed to log out: ${error.message || "An error occurred"}`);
     }
   };
 
   const getUserInitials = () => {
-    if (!currentUser?.displayName) return "U";
+    if (!currentUser?.displayName) return currentUser?.email?.[0]?.toUpperCase() || "U";
     const names = currentUser.displayName.split(" ");
     if (names.length === 1) return names[0][0];
     return `${names[0][0]}${names[names.length - 1][0]}`;

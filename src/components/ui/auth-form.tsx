@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Mail, Lock, User } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface AuthFormProps {
   type?: "login" | "register";
@@ -31,19 +31,12 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
     try {
       await login(email, password);
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
+      toast.success("Login successful. Welcome back!");
       // Redirect to dashboard page after login
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
+      toast.error(`Login failed: ${error.message || "Please check your credentials and try again."}`);
     } finally {
       setIsLoading(false);
     }
@@ -61,21 +54,21 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
     const password = formData.get("password") as string;
     
     try {
-      await register(email, password);
+      const userCredential = await register(email, password);
       
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created. Welcome to TryPie!",
-      });
+      // Update display name
+      if (userCredential.user && (firstName || lastName)) {
+        await userCredential.user.updateProfile({
+          displayName: `${firstName} ${lastName}`.trim()
+        });
+      }
+      
+      toast.success("Registration successful. Your account has been created. Welcome to TryPie!");
       // Redirect to dashboard page after registration
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({
-        title: "Registration failed",
-        description: "There was an error creating your account. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`Registration failed: ${error.message || "There was an error creating your account. Please try again."}`);
     } finally {
       setIsLoading(false);
     }
@@ -87,19 +80,12 @@ export function AuthForm({ type = "login" }: AuthFormProps) {
     try {
       await signInWithGoogle();
       
-      toast({
-        title: "Login successful",
-        description: "Welcome to TryPie!",
-      });
+      toast.success("Login successful. Welcome to TryPie!");
       // Redirect to dashboard page after Google sign-in
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({
-        title: "Google sign-in failed",
-        description: "There was an error signing in with Google. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(`Google sign-in failed: ${error.message || "There was an error signing in with Google. Please try again."}`);
     } finally {
       setIsLoading(false);
     }
