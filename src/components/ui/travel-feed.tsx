@@ -2,6 +2,7 @@
 import React, { memo } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const TRAVEL_POSTS = [
   {
@@ -43,6 +44,45 @@ const TRAVEL_POSTS = [
     comments: 56,
     timestamp: "1 day ago",
   },
+  {
+    id: 4,
+    author: {
+      name: "Meera Patel",
+      avatar: "M",
+    },
+    location: "Valley of Flowers, Uttarakhand",
+    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07",
+    caption: "The incredible Valley of Flowers in full bloom - a paradise for nature lovers!",
+    likes: 276,
+    comments: 38,
+    timestamp: "2 days ago",
+  },
+  {
+    id: 5,
+    author: {
+      name: "Raj Malhotra",
+      avatar: "R",
+    },
+    location: "Leh, Ladakh",
+    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
+    caption: "The stunning landscapes of Ladakh - feels like you're on another planet!",
+    likes: 412,
+    comments: 67,
+    timestamp: "3 days ago",
+  },
+  {
+    id: 6,
+    author: {
+      name: "Ananya Reddy",
+      avatar: "A",
+    },
+    location: "Coorg, Karnataka",
+    image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb",
+    caption: "Misty mornings in the coffee plantations of Coorg - truly a slice of heaven!",
+    likes: 198,
+    comments: 29,
+    timestamp: "4 days ago",
+  },
 ];
 
 interface TravelFeedProps {
@@ -50,7 +90,7 @@ interface TravelFeedProps {
 }
 
 // Memoized TravelPost component to prevent unnecessary re-renders
-const TravelPost = memo(({ post, index }: { post: typeof TRAVEL_POSTS[0], index: number }) => {
+const TravelPost = memo(({ post }: { post: typeof TRAVEL_POSTS[0]; index?: number }) => {
   return (
     <div
       key={post.id}
@@ -68,14 +108,14 @@ const TravelPost = memo(({ post, index }: { post: typeof TRAVEL_POSTS[0], index:
         </div>
       </div>
       
-      <div className="aspect-w-4 aspect-h-3 relative">
+      <AspectRatio ratio={4/3} className="bg-muted">
         <img 
           src={post.image} 
           alt={post.caption} 
-          className="w-full h-56 object-cover"
-          loading="lazy" // Add lazy loading for better performance
+          className="w-full h-full object-cover"
+          loading="lazy"
         />
-      </div>
+      </AspectRatio>
       
       <div className="p-4">
         <div className="flex gap-4 mb-3">
@@ -102,7 +142,7 @@ const TravelPost = memo(({ post, index }: { post: typeof TRAVEL_POSTS[0], index:
 TravelPost.displayName = 'TravelPost';
 
 export function TravelFeed({ limit }: TravelFeedProps) {
-  // Filter posts based on limit if provided - do this once, not on every render
+  // Filter posts based on limit if provided
   const displayPosts = limit ? TRAVEL_POSTS.slice(0, limit) : TRAVEL_POSTS;
   
   return (
