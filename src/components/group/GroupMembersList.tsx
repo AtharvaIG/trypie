@@ -49,8 +49,25 @@ export const GroupMembersList: React.FC<GroupMembersListProps> = ({ groupId }) =
               };
             }
             
-            // In a real app, you would fetch user profiles from your users collection
-            // For now, we'll create placeholder data or use current user
+            // Try to get the user data from the users collection
+            try {
+              const userRef = ref(database, `users/${userId}`);
+              const userSnapshot = await get(userRef);
+              
+              if (userSnapshot.exists()) {
+                const userData = userSnapshot.val();
+                return {
+                  id: userId,
+                  displayName: userData.displayName || `User ${userId.substring(0, 4)}`,
+                  email: userData.email || `user-${userId.substring(0, 4)}@example.com`,
+                  isAdmin: userId === groupData.createdBy
+                };
+              }
+            } catch (error) {
+              console.error("Error fetching user:", error);
+            }
+            
+            // If user is the current user or user data retrieval failed
             if (userId === currentUser.uid) {
               return {
                 id: currentUser.uid,
@@ -60,6 +77,7 @@ export const GroupMembersList: React.FC<GroupMembersListProps> = ({ groupId }) =
               };
             }
             
+            // Fallback for other users
             return {
               id: userId,
               displayName: `User ${userId.substring(0, 4)}`,

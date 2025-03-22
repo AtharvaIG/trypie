@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ref, push, serverTimestamp, update, get } from "firebase/database";
@@ -50,7 +49,6 @@ type Message = {
   mentions?: string[];
 };
 
-// Define emoji sets
 const EMOJI_SETS = {
   common: ["😊", "😂", "❤️", "👍", "🎉", "🔥", "😍", "🙏", "😭", "😎"],
   faces: ["😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "😊"],
@@ -83,7 +81,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Effect to set message when editing
   useEffect(() => {
     if (editMessage) {
       setMessage(editMessage.text || "");
@@ -102,17 +99,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   }, [editMessage]);
   
-  // Focus the input when component mounts or when replying/editing
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, [replyToMessage, editMessage]);
   
-  // Function to load group members for @mentions
   const loadGroupMembers = async (query: string) => {
     try {
-      // Get the group members
       const groupMembersRef = ref(database, `groups/${groupId}/membersList`);
       const snapshot = await get(groupMembersRef);
       
@@ -143,15 +137,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
   
-  // Handle @mentions
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setMessage(newValue);
     
-    // Check for @mention
     const lastAtIndex = newValue.lastIndexOf('@');
     if (lastAtIndex !== -1) {
-      // Find if we're in the middle of a mention
       const textAfterAt = newValue.substring(lastAtIndex + 1);
       const spaceAfterAt = textAfterAt.indexOf(' ');
       const mentionText = spaceAfterAt === -1 ? textAfterAt : textAfterAt.substring(0, spaceAfterAt);
@@ -197,16 +188,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       setIsUploading(true);
       setUploadProgress(0);
       
-      // Get reference to storage
       const storage = getStorage();
       const fileRef = storageRef(storage, `group-files/${groupId}/${Date.now()}_${file.name}`);
       
-      // Upload file
       const uploadTask = uploadBytes(fileRef, file);
       
-      // Handle progress (in a real app, you'd use uploadTask.on('state_changed', ...))
-      // Since Firebase's Web v9 modular API doesn't directly expose progress events,
-      // this is a simulated progress for the demo
       const simulateProgress = () => {
         let progress = 0;
         const interval = setInterval(() => {
@@ -223,12 +209,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       
       const progressInterval = simulateProgress();
       
-      // Wait for upload to complete
       await uploadTask;
       clearInterval(progressInterval);
       setUploadProgress(100);
       
-      // Get download URL
       const downloadUrl = await getDownloadURL(fileRef);
       
       const isImage = file.type.startsWith('image/');
@@ -266,27 +250,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       return;
     }
     
+    if (!groupId) {
+      toast.error("Invalid group. Please try again.");
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
       
-      // Extract mentions
       const mentionRegex = /@([a-zA-Z0-9_]+)/g;
       const mentionsInMessage = [...message.matchAll(mentionRegex)].map(match => match[1]);
       
-      // Prepare base message data
       const messageData: any = {
         text: message.trim(),
         senderId: currentUser.uid,
         senderName: currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        groupId: groupId
       };
       
-      // Add reply info if replying
       if (replyToMessage) {
         messageData.replyTo = replyToMessage.id;
       }
       
-      // Add file info if uploaded
       if (uploadedFile) {
         if (uploadedFile.type === 'image') {
           messageData.imageUrl = uploadedFile.url;
@@ -296,24 +282,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
       }
       
-      // Add mentions if any
       if (mentionsInMessage.length > 0) {
         messageData.mentions = mentionsInMessage;
       }
       
       if (editMessage) {
-        // Update existing message
         const messageRef = ref(database, `messages/${groupId}/${editMessage.id}`);
         await update(messageRef, messageData);
         toast.success("Message updated");
         
         if (onCancelEdit) onCancelEdit();
       } else {
-        // Create a new message reference
         const messageRef = push(ref(database, `messages/${groupId}`));
         await update(messageRef, messageData);
         
-        // Update last activity for the group
         await update(ref(database, `groups/${groupId}`), {
           lastActivity: "Just now"
         });
@@ -323,7 +305,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
       }
       
-      // Clear the input
       setMessage("");
       setUploadedFile(null);
       
@@ -342,7 +323,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className="space-y-2">
-      {/* Reply or Edit indicator */}
       {(replyToMessage || editMessage) && (
         <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
           <div className="flex-1 flex items-center gap-2 overflow-hidden">
@@ -373,7 +353,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
       
-      {/* File upload progress */}
       {isUploading && (
         <div className="px-3 py-2 bg-muted rounded-md">
           <div className="flex justify-between mb-1 text-sm">
@@ -384,7 +363,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
       
-      {/* Uploaded file preview */}
       {uploadedFile && (
         <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
           {uploadedFile.type === 'image' ? (
@@ -414,7 +392,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
       
-      {/* Message input form */}
       <form onSubmit={handleSendMessage} className="flex items-end gap-2">
         <input 
           type="file"
@@ -434,7 +411,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             rows={2}
           />
           
-          {/* Emoji picker button */}
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
             <PopoverTrigger asChild>
               <Button 
@@ -506,7 +482,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             </PopoverContent>
           </Popover>
           
-          {/* Mention suggestions */}
           {showMentionList && mentionUsers.length > 0 && (
             <div className="absolute bottom-full left-0 mb-1 w-full bg-background border rounded-md shadow-md z-10">
               <ScrollArea className="max-h-[150px]">

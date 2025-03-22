@@ -19,8 +19,11 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
   const [email, setEmail] = useState("");
   const [inviting, setInviting] = useState(false);
   
-  // In a real app, you would implement user search functionality
-  // For demo purposes, we'll simulate adding users by email
+  // Function to generate a consistent user ID from email for demo purposes
+  const generateUserIdFromEmail = (email: string) => {
+    return `simulated-${email.replace(/[^a-zA-Z0-9]/g, "-")}`;
+  };
+  
   const handleInviteMember = async () => {
     if (!email.trim() || !currentUser || !groupId) {
       toast.error("Please enter a valid email address");
@@ -30,9 +33,21 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
     try {
       setInviting(true);
       
-      // In a real app, you would search for the user by email
-      // For demo purposes, we'll create a simulated user ID based on the email
-      const simulatedUserId = `simulated-${email.replace(/[^a-zA-Z0-9]/g, "-")}`;
+      // First check if email represents an existing user
+      // In a real app, you would query your users collection by email
+      // For demo, we'll simulate this by checking if the email matches current user
+      
+      let userId = "";
+      
+      if (email === currentUser.email) {
+        // User is inviting themselves
+        toast.error("You are already a member of this group");
+        setInviting(false);
+        return;
+      } else {
+        // For demo purposes, create a simulated user ID
+        userId = generateUserIdFromEmail(email);
+      }
       
       // Check if the group exists
       const groupRef = ref(database, `groups/${groupId}`);
@@ -42,7 +57,7 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
         const groupData = snapshot.val();
         
         // Check if the member is already in the group
-        if (groupData.membersList && groupData.membersList[simulatedUserId]) {
+        if (groupData.membersList && groupData.membersList[userId]) {
           toast.error("This user is already a member of the group");
           setInviting(false);
           return;
@@ -50,7 +65,7 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
         
         // Update the members list
         const membersList = groupData.membersList || {};
-        membersList[simulatedUserId] = true;
+        membersList[userId] = true;
         
         // Update member count and preview
         const previewMembers = groupData.previewMembers || [];

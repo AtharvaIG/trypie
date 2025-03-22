@@ -108,16 +108,21 @@ const Groups = () => {
       if (data) {
         Object.keys(data).forEach((key) => {
           const group = data[key];
+          // Check if current user is a member of this group
+          const isUserMember = group.membersList && 
+                               Object.keys(group.membersList).includes(currentUser.uid);
           
-          groupsList.push({
-            id: key,
-            name: group.name,
-            members: group.members || 0,
-            lastActivity: group.lastActivity || 'Never',
-            previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
-            createdBy: group.createdBy,
-            membersList: group.membersList || {}
-          });
+          if (isUserMember) {
+            groupsList.push({
+              id: key,
+              name: group.name,
+              members: group.members || 0,
+              lastActivity: group.lastActivity || 'Never',
+              previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
+              createdBy: group.createdBy,
+              membersList: group.membersList || {}
+            });
+          }
         });
       }
       
