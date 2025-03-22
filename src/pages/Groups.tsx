@@ -57,6 +57,70 @@ const sampleGroups = [
   }
 ];
 
+// Sample messages for each group
+const sampleMessages = {
+  "European Adventure 2023": [
+    {
+      text: "Hey everyone! I'm so excited for our trip to Europe next month!",
+      senderId: "system",
+      senderName: "TravelBuddy",
+      timestamp: Date.now() - 86400000 * 6, // 6 days ago
+    },
+    {
+      text: "Me too! I've been researching some great restaurants in Paris.",
+      senderId: "user1",
+      senderName: "Emma",
+      timestamp: Date.now() - 86400000 * 5, // 5 days ago
+    },
+    {
+      text: "Has anyone booked their flights yet? I found some good deals on Expedia.",
+      senderId: "user2",
+      senderName: "Jake",
+      timestamp: Date.now() - 86400000 * 4, // 4 days ago
+    }
+  ],
+  "Beach Weekend Getaway": [
+    {
+      text: "Who's bringing the beach umbrellas?",
+      senderId: "user3",
+      senderName: "Sophia",
+      timestamp: Date.now() - 86400000 * 2, // 2 days ago
+    },
+    {
+      text: "I'll bring them along with some coolers for drinks!",
+      senderId: "system",
+      senderName: "TravelBuddy",
+      timestamp: Date.now() - 86400000 * 1.5, // 1.5 days ago
+    },
+    {
+      text: "Great! I'll handle the snacks and sunscreen.",
+      senderId: "user4",
+      senderName: "David",
+      timestamp: Date.now() - 86400000, // 1 day ago
+    }
+  ],
+  "Hiking Trip Planning": [
+    {
+      text: "I found this amazing trail at Yosemite we should try!",
+      senderId: "system",
+      senderName: "TravelBuddy",
+      timestamp: Date.now() - 43200000, // 12 hours ago
+    },
+    {
+      text: "Looks challenging but fun! How long is the hike?",
+      senderId: "user5",
+      senderName: "Alex",
+      timestamp: Date.now() - 21600000, // 6 hours ago
+    },
+    {
+      text: "About 8 miles round trip. We should start early to avoid the afternoon heat.",
+      senderId: "system",
+      senderName: "TravelBuddy",
+      timestamp: Date.now() - 7200000, // 2 hours ago
+    }
+  ]
+};
+
 const Groups = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -80,7 +144,22 @@ const Groups = () => {
         // No groups exist, create sample groups
         for (const group of sampleGroups) {
           const newGroupRef = push(groupsRef);
+          const groupId = newGroupRef.key;
           await set(newGroupRef, group);
+          
+          // Add sample messages for this group
+          const groupName = group.name;
+          if (groupId && sampleMessages[groupName]) {
+            const messagesRef = ref(database, `messages/${groupId}`);
+            
+            // Add each message
+            for (const message of sampleMessages[groupName]) {
+              const newMessageRef = push(messagesRef);
+              await set(newMessageRef, message);
+            }
+            
+            console.log(`Added sample messages for group: ${groupName}`);
+          }
         }
         toast.success("Sample groups created for demonstration");
       }
