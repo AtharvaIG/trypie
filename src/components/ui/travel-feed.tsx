@@ -6,7 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useInView } from "@/lib/animations";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Use local images to improve load times
+// Use only local images with reduced array (removing the last 3 posts)
 const TRAVEL_POSTS = [
   {
     id: 1,
@@ -41,55 +41,17 @@ const TRAVEL_POSTS = [
       avatar: "V",
     },
     location: "Varanasi, Uttar Pradesh",
-    image: "https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=800&q=80",
+    image: "/lovable-uploads/16d0ed76-87c2-475e-8072-b76f3b5cfd5c.png",
     caption: "Witnessing the Ganga Aarti at dawn - a spiritual experience like no other.",
     likes: 342,
     comments: 56,
     timestamp: "1 day ago",
   },
-  {
-    id: 4,
-    author: {
-      name: "Meera Patel",
-      avatar: "M",
-    },
-    location: "Valley of Flowers, Uttarakhand",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&q=80",
-    caption: "The incredible Valley of Flowers in full bloom - a paradise for nature lovers!",
-    likes: 276,
-    comments: 38,
-    timestamp: "2 days ago",
-  },
-  {
-    id: 5,
-    author: {
-      name: "Raj Malhotra",
-      avatar: "R",
-    },
-    location: "Leh, Ladakh",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80",
-    caption: "The stunning landscapes of Ladakh - feels like you're on another planet!",
-    likes: 412,
-    comments: 67,
-    timestamp: "3 days ago",
-  },
-  {
-    id: 6,
-    author: {
-      name: "Ananya Reddy",
-      avatar: "A",
-    },
-    location: "Coorg, Karnataka",
-    image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=800&q=80",
-    caption: "Misty mornings in the coffee plantations of Coorg - truly a slice of heaven!",
-    likes: 198,
-    comments: 29,
-    timestamp: "4 days ago",
-  },
 ];
 
 interface TravelFeedProps {
   limit?: number;
+  key?: string; // Add key prop to help React identify when to remount component
 }
 
 // Lazy-loaded image component with skeleton loading state
@@ -168,16 +130,13 @@ const TravelPost = memo(({ post }: { post: typeof TRAVEL_POSTS[0]; index?: numbe
 
 TravelPost.displayName = 'TravelPost';
 
-export function TravelFeed({ limit }: TravelFeedProps) {
+export function TravelFeed({ limit, key }: TravelFeedProps) {
   // Filter posts based on limit if provided
   const displayPosts = limit ? TRAVEL_POSTS.slice(0, limit) : TRAVEL_POSTS;
   
-  // Memoize the posts array to prevent unnecessary re-renders
-  const [posts] = useState(displayPosts);
-  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {posts.map((post, index) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" key={key || 'travel-feed'}>
+      {displayPosts.map((post) => (
         <TravelPost key={post.id} post={post} />
       ))}
     </div>

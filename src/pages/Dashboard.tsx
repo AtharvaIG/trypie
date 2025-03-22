@@ -72,7 +72,7 @@ const Dashboard = () => {
                     <Link to="/community">View all</Link>
                   </Button>
                 </div>
-                <TravelFeed limit={2} />
+                <TravelFeed limit={2} key="dashboard-feed" />
               </div>
               
               {/* Group Activity Section */}

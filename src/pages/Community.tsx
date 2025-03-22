@@ -14,7 +14,7 @@ const CommunityContent = memo(() => {
         Discover and share travel experiences from fellow adventurers across India's diverse landscapes.
       </p>
       
-      <TravelFeed />
+      <TravelFeed key="community-feed" />
     </section>
   );
 });

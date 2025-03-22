@@ -287,7 +287,7 @@ const Profile = () => {
           </TabsList>
           
           <TabsContent value="posts">
-            <TravelFeed />
+            <TravelFeed key="posts-feed" />
           </TabsContent>
           
           <TabsContent value="saved">
