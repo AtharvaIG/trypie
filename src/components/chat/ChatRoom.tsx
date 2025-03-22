@@ -18,6 +18,7 @@ type Message = {
   fileUrl?: string;
   fileName?: string;
   replyTo?: string;
+  groupId?: string;
 };
 
 type ChatRoomProps = {
@@ -64,6 +65,7 @@ export function ChatRoomWrapper({ groupId }: ChatRoomProps) {
         const messageList = Object.entries(data).map(([key, value]: [string, any]) => ({
           id: key,
           ...value,
+          groupId: groupId, // Add groupId to each message
           isCurrentUser: value.senderId === currentUser?.uid
         }));
         
@@ -113,6 +115,7 @@ export function ChatRoomWrapper({ groupId }: ChatRoomProps) {
           messages={messages}
           onReplyToMessage={handleReplyToMessage}
           onEditMessage={handleEditMessage}
+          groupId={groupId}
         />
       )}
       

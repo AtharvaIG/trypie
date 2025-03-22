@@ -18,18 +18,21 @@ type Message = {
   fileUrl?: string;
   fileName?: string;
   replyTo?: string;
+  groupId?: string; // Add groupId to the Message type
 };
 
 interface MessageListProps {
   messages: Message[];
   onReplyToMessage?: (message: Message) => void;
   onEditMessage?: (message: Message) => void;
+  groupId: string; // Add groupId as a required prop
 }
 
 export function MessageListWrapper({ 
   messages = [],
   onReplyToMessage,
-  onEditMessage 
+  onEditMessage,
+  groupId // Add groupId parameter
 }: MessageListProps) {
   const { currentUser } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -166,7 +169,7 @@ export function MessageListWrapper({
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                        onClick={() => handleDeleteMessage(message.id, message.groupId)}
+                        onClick={() => handleDeleteMessage(message.id, groupId)}
                       >
                         <Trash className="h-3 w-3" />
                       </Button>
