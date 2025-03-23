@@ -24,6 +24,7 @@ type Group = {
   previewMembers: string[];
   createdBy: string;
   membersList?: {[key: string]: boolean};
+  createdAt?: number;
 };
 
 // Sample group data for initial setup
@@ -133,19 +134,16 @@ const Groups = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [activeTab, setActiveTab] = useState("details");
   
-  // Function to create sample groups if none exist
   const createSampleGroupsIfNeeded = async () => {
     if (!currentUser) return;
     
     try {
-      // Ensure we're working with the latest data
       const groupsRef = ref(database, 'groups');
       const snapshot = await get(groupsRef);
       
       if (!snapshot.exists()) {
         console.log("No groups found, creating sample groups...");
         
-        // No groups exist, create sample groups
         for (const group of sampleGroups) {
           const newGroupRef = push(groupsRef);
           const groupId = newGroupRef.key;
@@ -155,15 +153,12 @@ const Groups = () => {
             continue;
           }
           
-          // Create the membersList object with currentUser as a member
           const membersList: {[key: string]: boolean} = {};
           membersList[currentUser.uid] = true;
           if (group.membersList) {
-            // Include system user
             Object.assign(membersList, group.membersList);
           }
           
-          // Updated group data to include current user
           const updatedGroup = {
             ...group,
             membersList
@@ -172,12 +167,10 @@ const Groups = () => {
           await set(newGroupRef, updatedGroup);
           console.log(`Created sample group: ${group.name} with ID: ${groupId}`);
           
-          // Add sample messages for this group
           const groupName = group.name;
           if (sampleMessages[groupName]) {
             const messagesRef = ref(database, `messages/${groupId}`);
             
-            // Add each message
             for (const message of sampleMessages[groupName]) {
               const newMessageRef = push(messagesRef);
               await set(newMessageRef, message);
@@ -191,7 +184,6 @@ const Groups = () => {
       } else {
         console.log("Existing groups found:", Object.keys(snapshot.val() || {}).length);
         
-        // Check if current user is a member of any group
         let isMemberOfAnyGroup = false;
         const groupsData = snapshot.val();
         
@@ -202,7 +194,6 @@ const Groups = () => {
             }
           });
           
-          // If not a member of any group, add to all sample groups
           if (!isMemberOfAnyGroup) {
             console.log("Adding current user to existing groups");
             const updates: {[path: string]: any} = {};
@@ -232,7 +223,6 @@ const Groups = () => {
     setLoading(true);
     setLoadError(null);
     createSampleGroupsIfNeeded().then(() => {
-      // Refresh will be handled by onValue listener
     }).catch(error => {
       console.error("Error refreshing groups:", error);
       setLoading(false);
@@ -249,12 +239,10 @@ const Groups = () => {
     console.log("Setting up groups listener for user:", currentUser.uid);
     const groupsRef = ref(database, 'groups');
     
-    // Create sample groups if needed
     createSampleGroupsIfNeeded().catch(error => {
       console.error("Failed to create sample groups:", error);
     });
     
-    // Listen for groups data
     const unsubscribe = onValue(
       groupsRef, 
       (snapshot) => {
@@ -276,11 +264,14 @@ const Groups = () => {
                 lastActivity: group.lastActivity || 'Never',
                 previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
                 createdBy: group.createdBy,
-                membersList: group.membersList || {}
+                membersList: group.membersList || {},
+                createdAt: group.createdAt || 0
               });
             }
           });
         }
+        
+        groupsList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         
         console.log(`Found ${groupsList.length} groups for user ${currentUser.uid}`);
         setGroups(groupsList);
@@ -295,8 +286,6 @@ const Groups = () => {
     );
     
     return () => {
-      // Clean up listener
-      console.log("Cleaning up groups listener");
       off(groupsRef);
     };
   }, [currentUser]);
@@ -315,7 +304,6 @@ const Groups = () => {
     try {
       setIsCreating(true);
       
-      // Generate a new group reference
       const groupRef = push(ref(database, 'groups'));
       const groupId = groupRef.key;
       
@@ -323,18 +311,15 @@ const Groups = () => {
         throw new Error("Failed to generate group ID");
       }
       
-      // Initial members list with the creator
       const membersList: {[key: string]: boolean} = {};
       membersList[currentUser.uid] = true;
       
-      // Get first letter of user's email or use 'U' as fallback
       const userInitial = currentUser.email 
         ? currentUser.email.charAt(0).toUpperCase() 
         : (currentUser.displayName 
           ? currentUser.displayName.charAt(0).toUpperCase() 
           : 'U');
       
-      // Group data
       const groupData = {
         name: newGroupName.trim(),
         createdBy: currentUser.uid,
@@ -347,17 +332,13 @@ const Groups = () => {
       
       console.log("Creating group with data:", groupData);
       
-      // Save the group
       await set(groupRef, groupData);
       
-      // Close the dialog and reset
-      setIsDialogOpen(false);
       setNewGroupName("");
+      setIsDialogOpen(false);
       
-      // Show success message and direct user to the chat for the new group
       toast.success("Group created successfully!");
       
-      // Slight delay to ensure the database has updated
       setTimeout(() => {
         navigate(`/group-chat/${groupId}`);
       }, 500);
@@ -384,7 +365,6 @@ const Groups = () => {
     setActiveTab("invite");
   };
 
-  // Component to show when there are no groups
   const NoGroupsMessage = () => (
     <Card className="p-8 text-center border-dashed border-2">
       <div className="flex flex-col items-center">
@@ -433,7 +413,7 @@ const Groups = () => {
                   <div className="py-4">
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="group-name">
+                        <Label htmlFor="group-name" id="group-name-label">
                           Group Name
                         </Label>
                         <Input
@@ -446,7 +426,12 @@ const Groups = () => {
                               handleCreateGroup();
                             }
                           }}
+                          aria-labelledby="group-name-label"
+                          aria-describedby="group-name-description"
                         />
+                        <p id="group-name-description" className="text-sm text-muted-foreground">
+                          Enter a name for your travel group.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -455,7 +440,7 @@ const Groups = () => {
                       variant="outline" 
                       onClick={() => {
                         setIsDialogOpen(false);
-                        setIsCreating(false);
+                        setNewGroupName("");
                       }}
                     >
                       Cancel
@@ -549,7 +534,6 @@ const Groups = () => {
           )}
         </section>
 
-        {/* Group management dialog */}
         {selectedGroup && (
           <Dialog open={!!selectedGroup} onOpenChange={(open) => !open && setSelectedGroup(null)}>
             <DialogContent className="sm:max-w-[500px]">

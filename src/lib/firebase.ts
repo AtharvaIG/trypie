@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: "trvltrbe.appspot.com",
   messagingSenderId: "653442919921",
   appId: "1:653442919921:web:6b8c34fb86fa7e2a02e850",
-  databaseURL: "https://trvltrbe-default-rtdb.firebaseio.com"
+  databaseURL: "https://trvltrbe-default-rtdb.firebaseio.com/"
 };
 
 // Initialize Firebase
