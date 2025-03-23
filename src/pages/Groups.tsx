@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
-import { Users, Plus, MessageSquare, Clock, UserPlus } from "lucide-react";
+import { Users, Plus, MessageSquare, Clock, UserPlus, RefreshCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { ref, set, push, onValue, off, get, update } from "firebase/database";
 import { database } from "@/lib/firebase";
@@ -126,6 +126,7 @@ const Groups = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [newGroupName, setNewGroupName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -137,19 +138,43 @@ const Groups = () => {
     if (!currentUser) return;
     
     try {
+      // Ensure we're working with the latest data
       const groupsRef = ref(database, 'groups');
       const snapshot = await get(groupsRef);
       
       if (!snapshot.exists()) {
+        console.log("No groups found, creating sample groups...");
+        
         // No groups exist, create sample groups
         for (const group of sampleGroups) {
           const newGroupRef = push(groupsRef);
           const groupId = newGroupRef.key;
-          await set(newGroupRef, group);
+          
+          if (!groupId) {
+            console.error("Failed to generate group ID");
+            continue;
+          }
+          
+          // Create the membersList object with currentUser as a member
+          const membersList: {[key: string]: boolean} = {};
+          membersList[currentUser.uid] = true;
+          if (group.membersList) {
+            // Include system user
+            Object.assign(membersList, group.membersList);
+          }
+          
+          // Updated group data to include current user
+          const updatedGroup = {
+            ...group,
+            membersList
+          };
+          
+          await set(newGroupRef, updatedGroup);
+          console.log(`Created sample group: ${group.name} with ID: ${groupId}`);
           
           // Add sample messages for this group
           const groupName = group.name;
-          if (groupId && sampleMessages[groupName]) {
+          if (sampleMessages[groupName]) {
             const messagesRef = ref(database, `messages/${groupId}`);
             
             // Add each message
@@ -161,11 +186,58 @@ const Groups = () => {
             console.log(`Added sample messages for group: ${groupName}`);
           }
         }
+        
         toast.success("Sample groups created for demonstration");
+      } else {
+        console.log("Existing groups found:", Object.keys(snapshot.val() || {}).length);
+        
+        // Check if current user is a member of any group
+        let isMemberOfAnyGroup = false;
+        const groupsData = snapshot.val();
+        
+        if (groupsData) {
+          Object.values(groupsData).forEach((group: any) => {
+            if (group.membersList && group.membersList[currentUser.uid]) {
+              isMemberOfAnyGroup = true;
+            }
+          });
+          
+          // If not a member of any group, add to all sample groups
+          if (!isMemberOfAnyGroup) {
+            console.log("Adding current user to existing groups");
+            const updates: {[path: string]: any} = {};
+            
+            Object.entries(groupsData).forEach(([groupId, groupData]: [string, any]) => {
+              if (!groupData.membersList) {
+                groupData.membersList = {};
+              }
+              groupData.membersList[currentUser.uid] = true;
+              updates[`groups/${groupId}/membersList/${currentUser.uid}`] = true;
+            });
+            
+            if (Object.keys(updates).length > 0) {
+              await update(ref(database), updates);
+              console.log("Added current user to existing groups");
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error checking for sample groups:", error);
+      setLoadError("Error initializing sample groups");
     }
+  };
+  
+  const handleRefresh = () => {
+    setLoading(true);
+    setLoadError(null);
+    createSampleGroupsIfNeeded().then(() => {
+      // Refresh will be handled by onValue listener
+    }).catch(error => {
+      console.error("Error refreshing groups:", error);
+      setLoading(false);
+      setLoadError("Failed to refresh groups");
+    });
   };
   
   useEffect(() => {
@@ -174,47 +246,57 @@ const Groups = () => {
       return;
     }
     
+    console.log("Setting up groups listener for user:", currentUser.uid);
     const groupsRef = ref(database, 'groups');
     
     // Create sample groups if needed
-    createSampleGroupsIfNeeded();
+    createSampleGroupsIfNeeded().catch(error => {
+      console.error("Failed to create sample groups:", error);
+    });
     
     // Listen for groups data
-    const unsubscribe = onValue(groupsRef, (snapshot) => {
-      const data = snapshot.val();
-      const groupsList: Group[] = [];
-      
-      if (data) {
-        Object.keys(data).forEach((key) => {
-          const group = data[key];
-          // Check if current user is a member of this group
-          const isUserMember = group.membersList && 
+    const unsubscribe = onValue(
+      groupsRef, 
+      (snapshot) => {
+        console.log("Groups data received");
+        const data = snapshot.val();
+        const groupsList: Group[] = [];
+        
+        if (data) {
+          Object.keys(data).forEach((key) => {
+            const group = data[key];
+            const isUserMember = group.membersList && 
                                Object.keys(group.membersList).includes(currentUser.uid);
-          
-          if (isUserMember) {
-            groupsList.push({
-              id: key,
-              name: group.name,
-              members: group.members || 0,
-              lastActivity: group.lastActivity || 'Never',
-              previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
-              createdBy: group.createdBy,
-              membersList: group.membersList || {}
-            });
-          }
-        });
+            
+            if (isUserMember) {
+              groupsList.push({
+                id: key,
+                name: group.name,
+                members: group.members || Object.keys(group.membersList || {}).length,
+                lastActivity: group.lastActivity || 'Never',
+                previewMembers: group.previewMembers || ['A', 'B'].slice(0, group.members),
+                createdBy: group.createdBy,
+                membersList: group.membersList || {}
+              });
+            }
+          });
+        }
+        
+        console.log(`Found ${groupsList.length} groups for user ${currentUser.uid}`);
+        setGroups(groupsList);
+        setLoading(false);
+      }, 
+      (error) => {
+        console.error("Error fetching groups:", error);
+        setLoading(false);
+        setLoadError("Failed to load groups");
+        toast.error("Failed to load groups");
       }
-      
-      setGroups(groupsList);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching groups:", error);
-      setLoading(false);
-      toast.error("Failed to load groups");
-    });
+    );
     
     return () => {
       // Clean up listener
+      console.log("Cleaning up groups listener");
       off(groupsRef);
     };
   }, [currentUser]);
@@ -332,62 +414,79 @@ const Groups = () => {
                 Plan, chat, and share expenses with your travel companions.
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create New Group
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create a New Group</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="group-name">
-                        Group Name
-                      </Label>
-                      <Input
-                        id="group-name"
-                        placeholder="Enter group name"
-                        value={newGroupName}
-                        onChange={(e) => setNewGroupName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && newGroupName.trim()) {
-                            handleCreateGroup();
-                          }
-                        }}
-                      />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Group
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create a New Group</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="group-name">
+                          Group Name
+                        </Label>
+                        <Input
+                          id="group-name"
+                          placeholder="Enter group name"
+                          value={newGroupName}
+                          onChange={(e) => setNewGroupName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && newGroupName.trim()) {
+                              handleCreateGroup();
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setIsDialogOpen(false);
-                      setIsCreating(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleCreateGroup}
-                    disabled={isCreating || !newGroupName.trim()}
-                  >
-                    {isCreating ? 'Creating...' : 'Create Group'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        setIsCreating(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleCreateGroup}
+                      disabled={isCreating || !newGroupName.trim()}
+                    >
+                      {isCreating ? 'Creating...' : 'Create Group'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
           
           {loading ? (
-            <div className="flex justify-center py-12">
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+              <p>Loading groups...</p>
             </div>
+          ) : loadError ? (
+            <Card className="p-8 text-center border-dashed border-2">
+              <div className="flex flex-col items-center">
+                <p className="text-destructive mb-4">{loadError}</p>
+                <Button onClick={handleRefresh}>
+                  <RefreshCcw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </Card>
           ) : groups.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {groups.map((group) => (

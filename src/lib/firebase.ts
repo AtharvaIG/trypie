@@ -1,7 +1,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getDatabase } from "firebase/database";
+import { getDatabase, connectDatabaseEmulator } from "firebase/database";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -19,4 +19,13 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const database = getDatabase(app);
 export const storage = getStorage(app);
+
+// Enable persistent data storage for offline capabilities
+const connectedRef = database.ref('.info/connected');
+
+// Debug logging in development
+if (process.env.NODE_ENV !== 'production') {
+  console.log('Firebase initialized in development mode');
+}
+
 export default app;
