@@ -48,7 +48,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
           {group.previewMembers.map((member, index) => (
-            <Avatar key={index} className="h-8 w-8 border-2 border-background">
+            <Avatar key={`${group.id}-member-${index}`} className="h-8 w-8 border-2 border-background">
               <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {member}
               </div>

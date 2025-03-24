@@ -71,7 +71,7 @@ export function MessageListWrapper({
         <>
           {messages.map((message) => (
             <div 
-              key={message.id} 
+              key={message.id || `message-${message.timestamp}-${message.senderId}`} 
               className={`flex items-start gap-2 ${message.isCurrentUser ? 'justify-end' : ''}`}
             >
               {!message.isCurrentUser && (
