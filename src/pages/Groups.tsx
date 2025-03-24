@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/ui/footer";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { database } from "@/lib/firebase";
+import { ref, get } from "firebase/database";
 
 // Import refactored components
 import { Group } from "@/components/group/GroupTypes";
@@ -25,30 +26,52 @@ const Groups = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [activeTab, setActiveTab] = useState("details");
   
-  const handleRefresh = () => {
+  // Verify Firebase connection on component mount
+  useEffect(() => {
+    const connectedRef = ref(database, '.info/connected');
+    const unsubscribe = subscribeToUserGroups(
+      currentUser?.uid || '',
+      (snapshot) => {
+        console.log('Database connection status:', snapshot.val());
+      },
+      (error) => {
+        console.error('Database connection error:', error);
+        setLoadError('Failed to connect to database. Please check your connection.');
+        toast.error('Connection error. Please try again.');
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+  
+  const handleRefresh = async () => {
+    if (!currentUser) {
+      toast.error("Please login to view groups");
+      return;
+    }
+
     setLoading(true);
     setLoadError(null);
-    createSampleGroupsIfNeeded(currentUser?.uid || "")
-      .then(() => {
-        // Data will be refreshed via the listener
-        console.log("Triggered refresh of groups data");
-      })
-      .catch(error => {
-        console.error("Error refreshing groups:", error);
-        setLoading(false);
-        setLoadError("Failed to refresh groups");
-      });
+    
+    try {
+      await createSampleGroupsIfNeeded(currentUser.uid);
+      console.log("Groups refreshed successfully");
+    } catch (error) {
+      console.error("Error refreshing groups:", error);
+      setLoadError("Failed to refresh groups");
+      toast.error("Failed to refresh groups. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
   
   useEffect(() => {
     if (!currentUser) {
       setLoading(false);
-      return () => {};
+      return;
     }
     
     console.log("Setting up groups listener for user:", currentUser.uid);
-    
-    // Set loading state before attempting to load groups
     setLoading(true);
     
     // Create sample groups if needed
@@ -75,7 +98,6 @@ const Groups = () => {
       }
     );
     
-    // Return the unsubscribe function for cleanup
     return unsubscribe;
   }, [currentUser]);
   
@@ -117,14 +139,16 @@ const Groups = () => {
   const handleJoinChat = (groupId: string) => {
     if (!groupId) {
       console.error("Invalid group ID for chat");
+      toast.error("Invalid group selected");
       return;
     }
     navigate(`/group-chat/${groupId}`);
   };
 
   const handleManageGroup = (group: Group) => {
-    if (!group || !group.id) {
+    if (!group?.id) {
       console.error("Cannot manage invalid group:", group);
+      toast.error("Invalid group selected");
       return;
     }
     setSelectedGroup(group);
@@ -132,8 +156,9 @@ const Groups = () => {
   };
 
   const handleInviteUsers = (group: Group) => {
-    if (!group || !group.id) {
+    if (!group?.id) {
       console.error("Cannot invite to invalid group:", group);
+      toast.error("Invalid group selected");
       return;
     }
     setSelectedGroup(group);
