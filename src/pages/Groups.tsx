@@ -42,29 +42,39 @@ const Groups = () => {
   useEffect(() => {
     if (!currentUser) {
       setLoading(false);
-      return;
+      return () => {};
     }
     
     console.log("Setting up groups listener for user:", currentUser.uid);
     
+    // Set loading state before attempting to load groups
+    setLoading(true);
+    
+    // Create sample groups if needed
     createSampleGroupsIfNeeded(currentUser.uid)
       .catch(error => {
         console.error("Failed to create sample groups:", error);
+        setLoadError("Failed to initialize sample groups");
       });
     
+    // Subscribe to user groups
     const unsubscribe = subscribeToUserGroups(
       currentUser.uid,
       (groupsList) => {
+        console.log("Groups loaded successfully:", groupsList.length);
         setGroups(groupsList);
         setLoading(false);
+        setLoadError(null);
       },
       (error) => {
+        console.error("Failed to load groups:", error);
         setLoading(false);
         setLoadError("Failed to load groups");
         toast.error("Failed to load groups");
       }
     );
     
+    // Return the unsubscribe function for cleanup
     return unsubscribe;
   }, [currentUser]);
   
@@ -154,12 +164,14 @@ const Groups = () => {
           />
         </section>
 
-        <ManageGroupDialog
-          selectedGroup={selectedGroup}
-          onClose={() => setSelectedGroup(null)}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        {selectedGroup && (
+          <ManageGroupDialog
+            selectedGroup={selectedGroup}
+            onClose={() => setSelectedGroup(null)}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        )}
       </main>
       
       <Footer />

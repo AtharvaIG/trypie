@@ -19,10 +19,19 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onManageGroup, 
   onInviteUsers 
 }) => {
+  // Safety check for incomplete group data
+  if (!group || !group.id) {
+    console.error("Invalid group data:", group);
+    return null;
+  }
+
+  // Ensure previewMembers exists and is an array
+  const previewMembers = Array.isArray(group.previewMembers) ? group.previewMembers : [];
+
   return (
-    <Card key={group.id} className="p-6 hover:shadow-md transition-shadow">
+    <Card className="p-6 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-lg">{group.name}</h3>
+        <h3 className="font-bold text-lg">{group.name || "Unnamed Group"}</h3>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
@@ -47,7 +56,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
-          {group.previewMembers.map((member, index) => (
+          {previewMembers.map((member, index) => (
             <Avatar key={`${group.id}-member-${index}`} className="h-8 w-8 border-2 border-background">
               <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {member}
@@ -63,11 +72,11 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             onClick={() => onManageGroup(group)}
           >
             <Users className="h-3 w-3 mr-1" />
-            {group.members} members
+            {group.members || 0} members
           </Button>
           <p className="flex items-center">
             <Clock className="h-3 w-3 mr-1" />
-            Active {group.lastActivity}
+            Active {group.lastActivity || "Never"}
           </p>
         </div>
       </div>

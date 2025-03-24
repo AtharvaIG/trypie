@@ -53,7 +53,7 @@ export const GroupList: React.FC<GroupListProps> = ({
     );
   }
 
-  if (groups.length === 0) {
+  if (!groups || groups.length === 0) {
     return <NoGroupsMessage onCreateGroup={onCreateGroup} />;
   }
 
