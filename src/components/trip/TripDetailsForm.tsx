@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { CalendarIcon, Loader2, Sparkles } from "lucide-react";
 import { format, isBefore, startOfDay } from "date-fns";
 import { toast } from "sonner";
+import { DestinationSearch } from "./DestinationSearch";
 
 export const TripDetailsForm = ({ 
   tripDetails, 
@@ -22,8 +23,8 @@ export const TripDetailsForm = ({
     to: tripDetails.endDate,
   });
 
-  const handleDestinationChange = (e) => {
-    onChange({ ...tripDetails, destination: e.target.value });
+  const handleDestinationChange = (value: string) => {
+    onChange({ ...tripDetails, destination: value });
   };
 
   const handleTripTypeChange = (value) => {
@@ -31,7 +32,9 @@ export const TripDetailsForm = ({
   };
 
   const handleBudgetChange = (e) => {
-    onChange({ ...tripDetails, budget: Number(e.target.value) });
+    // Only allow numbers and prevent non-numeric input
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    onChange({ ...tripDetails, budget: value ? Number(value) : 0 });
   };
 
   const handleNotesChange = (e) => {
@@ -41,13 +44,11 @@ export const TripDetailsForm = ({
   const handleStartDateChange = (date) => {
     const today = startOfDay(new Date());
     
-    // Don't allow selection of past dates
     if (date && isBefore(date, today)) {
       toast.error("Start date cannot be in the past");
       return;
     }
     
-    // If end date exists and is before the new start date, reset it
     if (dateRange.to && isBefore(dateRange.to, date)) {
       setDateRange({ from: date, to: null });
       onChange({ ...tripDetails, startDate: date, endDate: null });
@@ -59,19 +60,16 @@ export const TripDetailsForm = ({
   };
 
   const handleEndDateChange = (date) => {
-    // If no start date, show error
     if (!dateRange.from) {
       toast.error("Please select a start date first");
       return;
     }
     
-    // Don't allow selection of dates before start date
     if (date && isBefore(date, dateRange.from)) {
       toast.error("End date must be after start date");
       return;
     }
     
-    // Don't allow selection of past dates
     const today = startOfDay(new Date());
     if (date && isBefore(date, today)) {
       toast.error("End date cannot be in the past");
@@ -82,27 +80,14 @@ export const TripDetailsForm = ({
     onChange({ ...tripDetails, endDate: date });
   };
 
-  // Function to disable past dates for start date selection
-  const disablePastDates = (date) => {
-    return isBefore(date, startOfDay(new Date()));
-  };
-  
-  // Function to disable dates before start date for end date selection
-  const disableBeforeStartDate = (date) => {
-    return dateRange.from ? isBefore(date, dateRange.from) : true;
-  };
-
   return (
     <Card className="bg-white rounded-xl border border-border shadow-sm p-6">
       <form className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="destination">Destination</Label>
-          <Input 
-            id="destination"
-            placeholder="Where are you going?"
+          <DestinationSearch 
             value={tripDetails.destination}
             onChange={handleDestinationChange}
-            required
           />
         </div>
         
@@ -128,7 +113,7 @@ export const TripDetailsForm = ({
                   mode="single"
                   selected={dateRange.from}
                   onSelect={handleStartDateChange}
-                  disabled={disablePastDates}
+                  disabled={(date) => isBefore(date, startOfDay(new Date()))}
                   initialFocus
                   className="p-3 pointer-events-auto"
                 />
@@ -155,7 +140,9 @@ export const TripDetailsForm = ({
                   mode="single"
                   selected={dateRange.to}
                   onSelect={handleEndDateChange}
-                  disabled={disableBeforeStartDate}
+                  disabled={(date) => 
+                    isBefore(date, dateRange.from || startOfDay(new Date()))
+                  }
                   initialFocus
                   className="p-3 pointer-events-auto"
                 />
@@ -163,7 +150,7 @@ export const TripDetailsForm = ({
             </Popover>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="trip-type">Trip Type</Label>
           <Select onValueChange={handleTripTypeChange} value={tripDetails.tripType}>
@@ -190,7 +177,9 @@ export const TripDetailsForm = ({
           <Label htmlFor="budget">Budget (INR)</Label>
           <Input 
             id="budget"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="What's your budget for this trip?"
             value={tripDetails.budget || ''}
             onChange={handleBudgetChange}

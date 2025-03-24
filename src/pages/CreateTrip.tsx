@@ -59,15 +59,88 @@ const CreateTrip = () => {
     
     setIsGenerating(true);
     
-    // Mock API call to generate AI itinerary
+    // Enhanced mock API call with destination-specific recommendations
     setTimeout(() => {
       const days = Math.ceil(
         (tripDetails.endDate.getTime() - tripDetails.startDate.getTime()) / (1000 * 60 * 60 * 24)
       ) + 1;
       
+      // Destination-specific activities based on the selected city
+      const citySpecificActivities = {
+        "San Francisco, USA": [
+          {
+            morning: {
+              title: "Golden Gate Bridge & Presidio",
+              description: "Start with a walk across the iconic Golden Gate Bridge, followed by exploring the Presidio's hiking trails",
+              location: "Golden Gate Bridge",
+              cost: 0
+            },
+            afternoon: {
+              title: "Fisherman's Wharf & Pier 39",
+              description: "Visit the famous sea lions, enjoy fresh seafood, and take a bay cruise",
+              location: "Pier 39",
+              cost: 45
+            },
+            evening: {
+              title: "Chinatown Dining Experience",
+              description: "Authentic dim sum and tea tasting in the largest Chinatown outside of Asia",
+              location: "Grant Avenue",
+              cost: 35
+            }
+          },
+          {
+            morning: {
+              title: "Alcatraz Island Tour",
+              description: "Take the early ferry to Alcatraz for a fascinating audio tour of the infamous prison",
+              location: "Alcatraz Island",
+              cost: 41
+            },
+            afternoon: {
+              title: "Mission District Art Walk",
+              description: "Explore colorful murals, visit Mission Dolores, and try local taquerias",
+              location: "Mission District",
+              cost: 25
+            },
+            evening: {
+              title: "North Beach Italian Dinner",
+              description: "Enjoy authentic Italian cuisine in San Francisco's Little Italy",
+              location: "Columbus Avenue",
+              cost: 50
+            }
+          }
+        ]
+      };
+      
+      const defaultActivities = [
+        {
+          morning: {
+            title: "Local Sightseeing",
+            description: "Explore the city's main attractions and landmarks",
+            location: "City Center",
+            cost: 30
+          },
+          afternoon: {
+            title: "Cultural Experience",
+            description: "Visit museums and cultural sites",
+            location: "Cultural District",
+            cost: 25
+          },
+          evening: {
+            title: "Local Dining",
+            description: "Experience local cuisine at recommended restaurants",
+            location: "Restaurant District",
+            cost: 40
+          }
+        }
+      ];
+      
+      const activityTemplates = citySpecificActivities[tripDetails.destination] || defaultActivities;
+      
       const generatedItinerary = Array.from({ length: days }, (_, index) => {
         const date = new Date(tripDetails.startDate);
         date.setDate(date.getDate() + index);
+        
+        const dayTemplate = activityTemplates[index % activityTemplates.length];
         
         return {
           id: `day-${index + 1}`,
@@ -77,34 +150,26 @@ const CreateTrip = () => {
             {
               id: `activity-${index}-1`,
               time: "09:00 AM",
-              title: index === 0 ? "Arrival & Hotel Check-in" : `Explore ${tripDetails.destination} - Area ${index}`,
-              description: "Start your day with a delicious breakfast",
-              location: "Hotel / Downtown",
-              cost: Math.floor(Math.random() * 50) + 10
+              title: dayTemplate.morning.title,
+              description: dayTemplate.morning.description,
+              location: dayTemplate.morning.location,
+              cost: dayTemplate.morning.cost
             },
             {
               id: `activity-${index}-2`,
-              time: "12:00 PM",
-              title: "Lunch at local restaurant",
-              description: "Try the local cuisine",
-              location: "City Center",
-              cost: Math.floor(Math.random() * 30) + 20
+              time: "02:00 PM",
+              title: dayTemplate.afternoon.title,
+              description: dayTemplate.afternoon.description,
+              location: dayTemplate.afternoon.location,
+              cost: dayTemplate.afternoon.cost
             },
             {
               id: `activity-${index}-3`,
-              time: "02:00 PM",
-              title: index === days - 1 ? "Shopping & Souvenirs" : "Visit Popular Attraction",
-              description: index === days - 1 ? "Get souvenirs for friends and family" : "Explore the most popular sight",
-              location: tripDetails.destination,
-              cost: Math.floor(Math.random() * 40) + 15
-            },
-            {
-              id: `activity-${index}-4`,
               time: "07:00 PM",
-              title: "Dinner",
-              description: "Enjoy a nice dinner",
-              location: "Recommended Restaurant",
-              cost: Math.floor(Math.random() * 60) + 30
+              title: dayTemplate.evening.title,
+              description: dayTemplate.evening.description,
+              location: dayTemplate.evening.location,
+              cost: dayTemplate.evening.cost
             }
           ]
         };
