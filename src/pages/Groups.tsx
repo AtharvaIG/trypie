@@ -31,6 +31,7 @@ const Groups = () => {
     createSampleGroupsIfNeeded(currentUser?.uid || "")
       .then(() => {
         // Data will be refreshed via the listener
+        console.log("Triggered refresh of groups data");
       })
       .catch(error => {
         console.error("Error refreshing groups:", error);
@@ -114,15 +115,27 @@ const Groups = () => {
   };
   
   const handleJoinChat = (groupId: string) => {
+    if (!groupId) {
+      console.error("Invalid group ID for chat");
+      return;
+    }
     navigate(`/group-chat/${groupId}`);
   };
 
   const handleManageGroup = (group: Group) => {
+    if (!group || !group.id) {
+      console.error("Cannot manage invalid group:", group);
+      return;
+    }
     setSelectedGroup(group);
     setActiveTab("details");
   };
 
   const handleInviteUsers = (group: Group) => {
+    if (!group || !group.id) {
+      console.error("Cannot invite to invalid group:", group);
+      return;
+    }
     setSelectedGroup(group);
     setActiveTab("invite");
   };

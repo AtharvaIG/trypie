@@ -27,6 +27,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
   // Ensure previewMembers exists and is an array
   const previewMembers = Array.isArray(group.previewMembers) ? group.previewMembers : [];
+  const memberCount = group.members || (group.membersList ? Object.keys(group.membersList).length : 0);
+  const lastActivity = group.lastActivity || "Never";
 
   return (
     <Card className="p-6 hover:shadow-md transition-shadow">
@@ -57,7 +59,10 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
           {previewMembers.map((member, index) => (
-            <Avatar key={`${group.id}-member-${index}`} className="h-8 w-8 border-2 border-background">
+            <Avatar 
+              key={`${group.id}-member-${index}`} 
+              className="h-8 w-8 border-2 border-background"
+            >
               <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {member}
               </div>
@@ -72,11 +77,11 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             onClick={() => onManageGroup(group)}
           >
             <Users className="h-3 w-3 mr-1" />
-            {group.members || 0} members
+            {memberCount} members
           </Button>
           <p className="flex items-center">
             <Clock className="h-3 w-3 mr-1" />
-            Active {group.lastActivity || "Never"}
+            Active {lastActivity}
           </p>
         </div>
       </div>

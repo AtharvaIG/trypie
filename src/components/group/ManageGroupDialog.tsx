@@ -26,13 +26,13 @@ export const ManageGroupDialog: React.FC<ManageGroupDialogProps> = ({
   activeTab,
   onTabChange
 }) => {
-  if (!selectedGroup) return null;
+  if (!selectedGroup || !selectedGroup.id) return null;
 
   return (
     <Dialog open={!!selectedGroup} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{selectedGroup.name}</DialogTitle>
+          <DialogTitle>{selectedGroup.name || "Unnamed Group"}</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue={activeTab} onValueChange={onTabChange} className="w-full">
@@ -46,7 +46,7 @@ export const ManageGroupDialog: React.FC<ManageGroupDialogProps> = ({
           </TabsContent>
           
           <TabsContent value="invite" className="space-y-4">
-            <InviteMembers groupId={selectedGroup.id} groupName={selectedGroup.name} />
+            <InviteMembers groupId={selectedGroup.id} groupName={selectedGroup.name || "Group"} />
           </TabsContent>
         </Tabs>
         
