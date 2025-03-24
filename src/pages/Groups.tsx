@@ -6,7 +6,7 @@ import { RefreshCcw, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { database } from "@/lib/firebase";
-import { ref, get } from "firebase/database";
+import { ref, get, onValue } from "firebase/database";
 
 // Import refactored components
 import { Group } from "@/components/group/GroupTypes";
@@ -29,19 +29,16 @@ const Groups = () => {
   // Verify Firebase connection on component mount
   useEffect(() => {
     const connectedRef = ref(database, '.info/connected');
-    const unsubscribe = subscribeToUserGroups(
-      currentUser?.uid || '',
-      (snapshot) => {
-        console.log('Database connection status:', snapshot.val());
-      },
-      (error) => {
-        console.error('Database connection error:', error);
-        setLoadError('Failed to connect to database. Please check your connection.');
-        toast.error('Connection error. Please try again.');
-      }
-    );
+    
+    const connectionListener = onValue(connectedRef, (snapshot) => {
+      console.log('Database connection status:', snapshot.val());
+    }, (error) => {
+      console.error('Database connection error:', error);
+      setLoadError('Failed to connect to database. Please check your connection.');
+      toast.error('Connection error. Please try again.');
+    });
 
-    return () => unsubscribe();
+    return () => connectionListener();
   }, []);
   
   const handleRefresh = async () => {
