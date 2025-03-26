@@ -1,4 +1,3 @@
-
 import { ref, set, push, onValue, off, get, update } from "firebase/database";
 import { database } from "@/lib/firebase";
 import { Group, sampleGroups, sampleMessages } from "@/components/group/GroupTypes";
@@ -149,7 +148,7 @@ export const subscribeToUserGroups = (
         Object.keys(data).forEach((key) => {
           const group = data[key];
           const isUserMember = group.membersList && 
-                             Object.keys(group.membersList).includes(currentUserId);
+                             Object.keys(group.membersList || {}).includes(currentUserId);
           
           if (isUserMember) {
             groupsList.push({
@@ -171,10 +170,11 @@ export const subscribeToUserGroups = (
       groupsList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       
       console.log(`Found ${groupsList.length} groups for user ${currentUserId}`);
-      callback(groupsList);
+      callback(groupsList || []);
     }, 
     (error) => {
       console.error("Error fetching groups:", error);
+      callback([]);
       errorCallback(error);
     }
   );

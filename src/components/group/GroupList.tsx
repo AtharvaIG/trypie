@@ -5,7 +5,7 @@ import { GroupCard } from "./GroupCard";
 import { NoGroupsMessage } from "./NoGroupsMessage";
 
 interface GroupListProps {
-  groups: Group[];
+  groups?: Group[]; // Make it optional with a fallback
   loading: boolean;
   loadError: string | null;
   onJoinChat: (groupId: string) => void;
@@ -16,7 +16,7 @@ interface GroupListProps {
 }
 
 export const GroupList: React.FC<GroupListProps> = ({
-  groups,
+  groups = [], // Provide default empty array
   loading,
   loadError,
   onJoinChat,
@@ -53,13 +53,18 @@ export const GroupList: React.FC<GroupListProps> = ({
     );
   }
 
-  if (!groups || groups.length === 0) {
+  // Ensure groups is always an array with a simple check
+  const safeGroups = Array.isArray(groups) ? groups : [];
+  
+  if (safeGroups.length === 0) {
+    console.log("No groups found, showing NoGroupsMessage");
     return <NoGroupsMessage onCreateGroup={onCreateGroup} />;
   }
 
+  console.log(`Rendering ${safeGroups.length} group cards`);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {groups.map((group) => (
+      {safeGroups.map((group) => (
         <GroupCard
           key={group.id}
           group={group}

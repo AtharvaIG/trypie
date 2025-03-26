@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/ui/footer";
@@ -25,6 +26,11 @@ const Groups = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [activeTab, setActiveTab] = useState("details");
+  
+  // Debug log for state changes
+  useEffect(() => {
+    console.log("Groups state updated:", groups?.length || 0, "groups");
+  }, [groups]);
   
   // Verify Firebase connection on component mount
   useEffect(() => {
@@ -72,7 +78,7 @@ const Groups = () => {
   };
   
   useEffect(() => {
-    console.log("Groups component mounted, current groups state:", groups);
+    console.log("Groups component mounted, current groups state:", Array.isArray(groups) ? groups.length : "not an array");
     
     if (!currentUser) {
       console.log("No user logged in, skipping groups fetch");
@@ -99,7 +105,8 @@ const Groups = () => {
       (groupsList) => {
         console.log("Groups loaded successfully:", groupsList?.length || 0);
         console.log("Groups data:", groupsList);
-        setGroups(groupsList);
+        // Ensure we always set a valid array
+        setGroups(groupsList || []);
         setLoading(false);
         setLoadError(null);
       },
@@ -107,6 +114,8 @@ const Groups = () => {
         console.error("Failed to load groups:", error);
         setLoading(false);
         setLoadError("Failed to load groups");
+        // Ensure we have an empty array if there was an error
+        setGroups([]);
         toast.error("Failed to load groups");
       }
     );
