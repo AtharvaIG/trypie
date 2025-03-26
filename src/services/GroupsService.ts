@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 export const createSampleGroupsIfNeeded = async (currentUserId: string): Promise<void> => {
   try {
+    console.log("Checking for existing groups...");
     const groupsRef = ref(database, 'groups');
     const snapshot = await get(groupsRef);
     
@@ -133,16 +134,18 @@ export const subscribeToUserGroups = (
   callback: (groups: Group[]) => void, 
   errorCallback: (error: Error) => void
 ) => {
+  console.log(`Setting up subscription for user: ${currentUserId}`);
   const groupsRef = ref(database, 'groups');
   
-  const unsubscribe = onValue(
+  const listener = onValue(
     groupsRef, 
     (snapshot) => {
-      console.log("Groups data received");
+      console.log("Groups data received from Firebase");
       const data = snapshot.val();
       const groupsList: Group[] = [];
       
       if (data) {
+        console.log("Processing groups data:", Object.keys(data).length, "groups found");
         Object.keys(data).forEach((key) => {
           const group = data[key];
           const isUserMember = group.membersList && 
@@ -161,6 +164,8 @@ export const subscribeToUserGroups = (
             });
           }
         });
+      } else {
+        console.log("No groups data found in database");
       }
       
       groupsList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -175,6 +180,7 @@ export const subscribeToUserGroups = (
   );
   
   return () => {
-    off(groupsRef);
+    console.log("Unsubscribing from groups data");
+    off(groupsRef, 'value', listener);
   };
 };

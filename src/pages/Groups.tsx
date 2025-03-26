@@ -6,7 +6,7 @@ import { RefreshCcw, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { database } from "@/lib/firebase";
-import { ref, get, onValue } from "firebase/database";
+import { ref, get, onValue, off } from "firebase/database";
 
 // Import refactored components
 import { Group } from "@/components/group/GroupTypes";
@@ -28,17 +28,25 @@ const Groups = () => {
   
   // Verify Firebase connection on component mount
   useEffect(() => {
+    console.log("Checking Firebase connection...");
     const connectedRef = ref(database, '.info/connected');
     
     const connectionListener = onValue(connectedRef, (snapshot) => {
-      console.log('Database connection status:', snapshot.val());
+      if (snapshot.exists()) {
+        console.log('Database connection status:', snapshot.val());
+      } else {
+        console.log('No connection status available');
+      }
     }, (error) => {
       console.error('Database connection error:', error);
       setLoadError('Failed to connect to database. Please check your connection.');
       toast.error('Connection error. Please try again.');
     });
 
-    return () => connectionListener();
+    return () => {
+      console.log("Cleaning up connection listener");
+      off(connectedRef);
+    };
   }, []);
   
   const handleRefresh = async () => {
@@ -51,6 +59,7 @@ const Groups = () => {
     setLoadError(null);
     
     try {
+      console.log("Refreshing groups for user:", currentUser.uid);
       await createSampleGroupsIfNeeded(currentUser.uid);
       console.log("Groups refreshed successfully");
     } catch (error) {
@@ -63,7 +72,10 @@ const Groups = () => {
   };
   
   useEffect(() => {
+    console.log("Groups component mounted, current groups state:", groups);
+    
     if (!currentUser) {
+      console.log("No user logged in, skipping groups fetch");
       setLoading(false);
       return;
     }
@@ -73,6 +85,9 @@ const Groups = () => {
     
     // Create sample groups if needed
     createSampleGroupsIfNeeded(currentUser.uid)
+      .then(() => {
+        console.log("Sample groups created/verified successfully");
+      })
       .catch(error => {
         console.error("Failed to create sample groups:", error);
         setLoadError("Failed to initialize sample groups");
@@ -82,7 +97,8 @@ const Groups = () => {
     const unsubscribe = subscribeToUserGroups(
       currentUser.uid,
       (groupsList) => {
-        console.log("Groups loaded successfully:", groupsList.length);
+        console.log("Groups loaded successfully:", groupsList?.length || 0);
+        console.log("Groups data:", groupsList);
         setGroups(groupsList);
         setLoading(false);
         setLoadError(null);
@@ -95,7 +111,10 @@ const Groups = () => {
       }
     );
     
-    return unsubscribe;
+    return () => {
+      console.log("Cleaning up groups subscription");
+      unsubscribe();
+    };
   }, [currentUser]);
   
   const handleCreateGroup = async (groupName: string) => {
