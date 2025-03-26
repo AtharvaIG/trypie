@@ -25,6 +25,27 @@ export const GroupList: React.FC<GroupListProps> = ({
   onCreateGroup,
   onRefresh
 }) => {
+  // Add a safety check before rendering
+  if (!Array.isArray(groups) && !loading) {
+    console.error("Groups is not an array in GroupList:", groups);
+    return (
+      <div className="p-8 text-center border-dashed border-2 rounded-lg">
+        <div className="flex flex-col items-center">
+          <p className="text-destructive mb-4">Error loading groups data</p>
+          <button 
+            className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 flex items-center gap-2" 
+            onClick={onRefresh}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">

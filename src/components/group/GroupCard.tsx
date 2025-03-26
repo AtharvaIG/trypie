@@ -25,21 +25,33 @@ export const GroupCard: React.FC<GroupCardProps> = ({
     return null;
   }
 
+  // Ensure all properties exist with fallbacks
+  const safeGroup = {
+    id: group.id,
+    name: group.name || "Unnamed Group",
+    members: group.members || 0,
+    lastActivity: group.lastActivity || "Never",
+    previewMembers: Array.isArray(group.previewMembers) ? group.previewMembers : [],
+    membersList: group.membersList || {},
+    createdBy: group.createdBy || "",
+    createdAt: group.createdAt || 0
+  };
+
   // Ensure previewMembers exists and is an array
-  const previewMembers = Array.isArray(group.previewMembers) ? group.previewMembers : [];
-  const memberCount = group.members || (group.membersList ? Object.keys(group.membersList).length : 0);
-  const lastActivity = group.lastActivity || "Never";
+  const previewMembers = safeGroup.previewMembers;
+  const memberCount = safeGroup.members || (safeGroup.membersList ? Object.keys(safeGroup.membersList).length : 0);
+  const lastActivity = safeGroup.lastActivity;
 
   return (
     <Card className="p-6 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-lg">{group.name || "Unnamed Group"}</h3>
+        <h3 className="font-bold text-lg">{safeGroup.name}</h3>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
             size="sm" 
             className="h-8 flex items-center"
-            onClick={() => onInviteUsers(group)}
+            onClick={() => onInviteUsers(safeGroup)}
           >
             <UserPlus className="h-4 w-4 mr-1" />
             Invite
@@ -48,7 +60,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             variant="secondary" 
             size="sm" 
             className="h-8 flex items-center"
-            onClick={() => onJoinChat(group.id)}
+            onClick={() => onJoinChat(safeGroup.id)}
           >
             <MessageSquare className="h-4 w-4 mr-1" />
             Chat
@@ -58,23 +70,31 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
-          {previewMembers.map((member, index) => (
-            <Avatar 
-              key={`${group.id}-member-${index}`} 
-              className="h-8 w-8 border-2 border-background"
-            >
+          {previewMembers.length > 0 ? (
+            previewMembers.map((member, index) => (
+              <Avatar 
+                key={`${safeGroup.id}-member-${index}`} 
+                className="h-8 w-8 border-2 border-background"
+              >
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  {member}
+                </div>
+              </Avatar>
+            ))
+          ) : (
+            <Avatar className="h-8 w-8 border-2 border-background">
               <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                {member}
+                ?
               </div>
             </Avatar>
-          ))}
+          )}
         </div>
         <div className="text-sm text-muted-foreground">
           <Button 
             variant="ghost" 
             size="sm" 
             className="h-6 p-0 text-xs"
-            onClick={() => onManageGroup(group)}
+            onClick={() => onManageGroup(safeGroup)}
           >
             <Users className="h-3 w-3 mr-1" />
             {memberCount} members

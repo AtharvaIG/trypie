@@ -19,7 +19,7 @@ import { createSampleGroupsIfNeeded, createGroup, subscribeToUserGroups } from "
 const Groups = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]); // Always start as an empty array
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -77,52 +77,63 @@ const Groups = () => {
     }
   };
   
-  useEffect(() => {
-    console.log("Groups component mounted, current groups state:", Array.isArray(groups) ? groups.length : "not an array");
-    
+  const fetchGroups = async () => {
     if (!currentUser) {
       console.log("No user logged in, skipping groups fetch");
       setLoading(false);
       return;
     }
-    
+
     console.log("Setting up groups listener for user:", currentUser.uid);
     setLoading(true);
     
-    // Create sample groups if needed
-    createSampleGroupsIfNeeded(currentUser.uid)
-      .then(() => {
-        console.log("Sample groups created/verified successfully");
-      })
-      .catch(error => {
-        console.error("Failed to create sample groups:", error);
-        setLoadError("Failed to initialize sample groups");
-      });
+    try {
+      // Create sample groups if needed
+      await createSampleGroupsIfNeeded(currentUser.uid);
+      console.log("Sample groups created/verified successfully");
+      
+      // Subscribe to user groups
+      const unsubscribe = subscribeToUserGroups(
+        currentUser.uid,
+        (groupsList) => {
+          console.log("Groups loaded successfully:", groupsList?.length || 0);
+          console.log("Groups data:", groupsList);
+          // Ensure we always set a valid array
+          setGroups(groupsList || []);
+          setLoading(false);
+          setLoadError(null);
+        },
+        (error) => {
+          console.error("Failed to load groups:", error);
+          setLoading(false);
+          setLoadError("Failed to load groups");
+          // Ensure we have an empty array if there was an error
+          setGroups([]);
+          toast.error("Failed to load groups");
+        }
+      );
+      
+      // Store the unsubscribe function for cleanup
+      return unsubscribe;
+    } catch (error) {
+      console.error("Error in fetchGroups:", error);
+      setLoading(false);
+      setLoadError("Failed to set up groups");
+      setGroups([]);
+      return () => {}; // Return empty function if setup failed
+    }
+  };
+  
+  useEffect(() => {
+    console.log("Groups component mounted, current groups state:", Array.isArray(groups) ? groups.length : "not an array");
     
-    // Subscribe to user groups
-    const unsubscribe = subscribeToUserGroups(
-      currentUser.uid,
-      (groupsList) => {
-        console.log("Groups loaded successfully:", groupsList?.length || 0);
-        console.log("Groups data:", groupsList);
-        // Ensure we always set a valid array
-        setGroups(groupsList || []);
-        setLoading(false);
-        setLoadError(null);
-      },
-      (error) => {
-        console.error("Failed to load groups:", error);
-        setLoading(false);
-        setLoadError("Failed to load groups");
-        // Ensure we have an empty array if there was an error
-        setGroups([]);
-        toast.error("Failed to load groups");
-      }
-    );
+    const unsubscribe = fetchGroups();
     
     return () => {
       console.log("Cleaning up groups subscription");
-      unsubscribe();
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
     };
   }, [currentUser]);
   
@@ -189,6 +200,22 @@ const Groups = () => {
     setSelectedGroup(group);
     setActiveTab("invite");
   };
+  
+  // Safety check before rendering
+  if (!Array.isArray(groups) && !loading) {
+    console.error("Groups is not an array:", groups);
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="container mx-auto px-4 py-8 mt-20">
+          <div className="p-8 text-center border-dashed border-2 rounded-lg">
+            <p className="text-destructive mb-4">Error: Groups data is invalid</p>
+            <Button onClick={handleRefresh}>Try Again</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background">
