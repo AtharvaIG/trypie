@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/ui/footer";
@@ -97,9 +96,9 @@ const Groups = () => {
         currentUser.uid,
         (groupsList) => {
           console.log("Groups loaded successfully:", groupsList?.length || 0);
-          console.log("Groups data:", groupsList);
+          console.log("Groups data:", JSON.stringify(groupsList).substring(0, 100) + "...");
           // Ensure we always set a valid array
-          setGroups(groupsList || []);
+          setGroups(Array.isArray(groupsList) ? groupsList : []);
           setLoading(false);
           setLoadError(null);
         },
@@ -231,6 +230,8 @@ const Groups = () => {
     );
   }
   
+  const safeGroups = Array.isArray(groups) ? groups : [];
+  
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 mt-20">
@@ -257,7 +258,7 @@ const Groups = () => {
           </div>
           
           <GroupList
-            groups={groups}
+            groups={safeGroups}
             loading={loading}
             loadError={loadError}
             onJoinChat={handleJoinChat}

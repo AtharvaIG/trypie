@@ -147,6 +147,8 @@ export const subscribeToUserGroups = (
         
         if (data) {
           console.log("Processing groups data:", Object.keys(data).length, "groups found");
+          
+          // Make sure we're iterating over an array of keys
           Object.keys(data).forEach((key) => {
             try {
               const group = data[key];
@@ -164,7 +166,7 @@ export const subscribeToUserGroups = (
                 groupsList.push({
                   id: key,
                   name: group.name || 'Unnamed Group',
-                  members: group.members || Object.keys(group.membersList || {}).length,
+                  members: group.members || (group.membersList ? Object.keys(group.membersList).length : 0),
                   lastActivity: group.lastActivity || 'Never',
                   previewMembers: Array.isArray(group.previewMembers) ? group.previewMembers : ['U'],
                   createdBy: group.createdBy || '',
@@ -182,11 +184,11 @@ export const subscribeToUserGroups = (
         
         // Ensure we always pass a valid array, even if empty
         console.log(`Found ${groupsList.length} groups for user ${currentUserId}`);
-        callback(groupsList || []);
+        callback(groupsList);
       }, 
       (error) => {
         console.error("Error fetching groups:", error);
-        callback([]); // Pass empty array on error
+        callback([]);  // Pass empty array on error
         errorCallback(error);
       }
     );
@@ -197,7 +199,7 @@ export const subscribeToUserGroups = (
     };
   } catch (error) {
     console.error("Error setting up groups subscription:", error);
-    callback([]); // Pass empty array on error
+    callback([]);  // Pass empty array on error
     errorCallback(error as Error);
     
     // Return a noop function instead of undefined
