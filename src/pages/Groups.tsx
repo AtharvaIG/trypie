@@ -81,7 +81,7 @@ const Groups = () => {
     if (!currentUser) {
       console.log("No user logged in, skipping groups fetch");
       setLoading(false);
-      return;
+      return () => {}; // Return empty function if no user
     }
 
     console.log("Setting up groups listener for user:", currentUser.uid);
@@ -113,7 +113,7 @@ const Groups = () => {
         }
       );
       
-      // Store the unsubscribe function for cleanup
+      // Return the unsubscribe function for cleanup
       return unsubscribe;
     } catch (error) {
       console.error("Error in fetchGroups:", error);
@@ -127,17 +127,26 @@ const Groups = () => {
   useEffect(() => {
     console.log("Groups component mounted, current groups state:", Array.isArray(groups) ? groups.length : "not an array");
     
-    const unsubscribe = fetchGroups();
+    let unsubscribeFunction: (() => void) | undefined;
     
-    // Fix: The unsubscribe function might be a Promise that resolves to a function, not directly callable
+    const setupGroups = async () => {
+      try {
+        const unsubscribe = await fetchGroups();
+        if (typeof unsubscribe === 'function') {
+          unsubscribeFunction = unsubscribe;
+        }
+      } catch (error) {
+        console.error("Error setting up groups:", error);
+      }
+    };
+    
+    setupGroups();
+    
+    // Clean up subscription when component unmounts
     return () => {
       console.log("Cleaning up groups subscription");
-      // Handle the case where unsubscribe might be a Promise or a function
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
-      } else if (unsubscribe && typeof unsubscribe.then === 'function') {
-        // If it's a Promise, we can't directly call it in the cleanup
-        console.log("Unsubscribe is a Promise, cannot directly call in cleanup");
+      if (typeof unsubscribeFunction === 'function') {
+        unsubscribeFunction();
       }
     };
   }, [currentUser]);
