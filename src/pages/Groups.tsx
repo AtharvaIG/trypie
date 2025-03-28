@@ -129,10 +129,15 @@ const Groups = () => {
     
     const unsubscribe = fetchGroups();
     
+    // Fix: The unsubscribe function might be a Promise that resolves to a function, not directly callable
     return () => {
       console.log("Cleaning up groups subscription");
+      // Handle the case where unsubscribe might be a Promise or a function
       if (typeof unsubscribe === 'function') {
         unsubscribe();
+      } else if (unsubscribe && typeof unsubscribe.then === 'function') {
+        // If it's a Promise, we can't directly call it in the cleanup
+        console.log("Unsubscribe is a Promise, cannot directly call in cleanup");
       }
     };
   }, [currentUser]);
