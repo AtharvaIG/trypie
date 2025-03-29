@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, DollarSign, Users, Check, Trash2, Receipt, Calculator, SplitSquare } from "lucide-react";
+import { Plus, DollarSign, Users, Check, Trash2, Receipt, Calculator, DollarSign } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -385,7 +384,7 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                 }
               </p>
             </div>
-            <SplitSquare className="h-8 w-8 text-primary" />
+            <DollarSign className="h-8 w-8 text-primary" />
           </div>
         </CardContent>
       </Card>
