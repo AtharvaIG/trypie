@@ -1,155 +1,150 @@
-
-import React, { useState, useEffect } from 'react';
-import { ref, onValue, off, get } from 'firebase/database';
-import { database } from '@/lib/firebase';
-import { toast } from 'sonner';
-import { MessageListWrapper } from './MessageList';
-import { MessageInput } from './MessageInput';
-import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { database } from "@/lib/firebase";
+import { ref, push, onValue, off } from "firebase/database";
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 import { ChatNavTabs } from './ChatNavTabs';
-import { MediaGallery } from './MediaGallery';
 import { SplitExpenses } from './SplitExpenses';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { MediaGallery } from './MediaGallery';
 
-type Message = {
+type ChatMessage = {
   id: string;
   text: string;
   senderId: string;
   senderName: string;
   timestamp: number;
-  imageUrl?: string;
-  fileUrl?: string;
-  fileName?: string;
-  replyTo?: string;
-  groupId?: string;
 };
 
-type ChatRoomProps = {
-  groupId: string;
-};
-
-export function ChatRoomWrapper({ groupId }: ChatRoomProps) {
+const ChatRoom = ({ groupId }: { groupId: string }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
   const { currentUser } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [groupName, setGroupName] = useState("Chat Room");
-  const [membersCount, setMembersCount] = useState(0);
-  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
-  const [editMessage, setEditMessage] = useState<Message | null>(null);
-  const [activeTab, setActiveTab] = useState('chat');
-
-  // Fetch group details
+  const messagesRef = useRef(ref(database, `chats/${groupId}`));
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
     if (!groupId) return;
-
-    const groupRef = ref(database, `groups/${groupId}`);
-    onValue(groupRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setGroupName(data.name || "Chat Room");
-        setMembersCount(data.members || 0);
-      }
-    });
-
-    return () => {
-      off(groupRef);
-    };
-  }, [groupId]);
-
-  // Fetch messages
-  useEffect(() => {
-    if (!groupId) return;
-
-    setLoading(true);
-    const messagesRef = ref(database, `messages/${groupId}`);
     
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
+    messagesRef.current = ref(database, `chats/${groupId}`);
+    
+    const unsubscribe = onValue(messagesRef.current, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const messageList = Object.entries(data).map(([key, value]: [string, any]) => ({
+        const messageList: ChatMessage[] = Object.entries(data).map(([key, value]: [string, any]) => ({
           id: key,
-          ...value,
-          groupId: groupId, // Add groupId to each message
-          isCurrentUser: value.senderId === currentUser?.uid
+          text: value.text,
+          senderId: value.senderId,
+          senderName: value.senderName,
+          timestamp: value.timestamp,
         }));
-        
-        // Sort messages by timestamp
-        messageList.sort((a, b) => a.timestamp - b.timestamp);
         setMessages(messageList);
       } else {
         setMessages([]);
       }
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching messages:", error);
-      toast.error("Failed to load messages");
-      setLoading(false);
+      scrollToBottom();
     });
-
+    
     return () => {
-      off(messagesRef);
+      off(messagesRef.current);
+      unsubscribe();
     };
-  }, [groupId, currentUser]);
-
-  const handleReplyToMessage = (message: Message) => {
-    setReplyToMessage(message);
-    setEditMessage(null);
+  }, [groupId]);
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  const scrollToBottom = () => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-  const handleEditMessage = (message: Message) => {
-    setEditMessage(message);
-    setReplyToMessage(null);
+  
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === "") return;
+    
+    if (!currentUser) {
+      toast.error("You must be logged in to send messages.");
+      return;
+    }
+    
+    const message: ChatMessage = {
+      id: uuidv4(),
+      text: newMessage,
+      senderId: currentUser.uid,
+      senderName: currentUser.displayName || "Anonymous",
+      timestamp: Date.now(),
+    };
+    
+    try {
+      await push(messagesRef.current, message);
+      setNewMessage("");
+      scrollToBottom();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message. Please try again.");
+    }
   };
-
+  
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)]">
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-semibold">{groupName}</h2>
-        {membersCount > 0 && (
-          <p className="text-sm text-muted-foreground">{membersCount} members</p>
-        )}
+    <div className="flex flex-col h-full">
+      <div className="flex-grow overflow-y-auto p-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`mb-2 p-2 rounded-lg ${
+              message.senderId === currentUser?.uid
+                ? "bg-primary/10 ml-auto text-right"
+                : "bg-secondary/10 mr-auto text-left"
+            }`}
+          >
+            <div className="text-xs text-muted-foreground">
+              {message.senderId === currentUser?.uid ? "You" : message.senderName}
+            </div>
+            <div>{message.text}</div>
+            <div className="text-xs text-muted-foreground">
+              {new Date(message.timestamp).toLocaleTimeString()}
+            </div>
+          </div>
+        ))}
+        <div ref={chatBottomRef} />
       </div>
       
-      <ChatNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <Tabs value={activeTab} className="flex-1 flex flex-col">
-        <TabsContent value="chat" className="flex-1 flex flex-col m-0 data-[state=inactive]:hidden">
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <MessageListWrapper 
-              messages={messages}
-              onReplyToMessage={handleReplyToMessage}
-              onEditMessage={handleEditMessage}
-              groupId={groupId}
-            />
-          )}
-          
-          <div className="p-4 border-t">
-            <MessageInput 
-              groupId={groupId}
-              replyToMessage={replyToMessage}
-              onCancelReply={() => setReplyToMessage(null)}
-              editMessage={editMessage}
-              onCancelEdit={() => setEditMessage(null)}
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="media" className="flex-1 overflow-auto m-0 data-[state=inactive]:hidden">
-          <MediaGallery groupId={groupId} />
-        </TabsContent>
-        
-        <TabsContent value="expenses" className="flex-1 overflow-auto m-0 data-[state=inactive]:hidden">
-          <SplitExpenses groupId={groupId} />
-        </TabsContent>
-      </Tabs>
+      <div className="p-4 border-t">
+        <div className="flex items-center">
+          <Input
+            type="text"
+            placeholder="Type your message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSendMessage();
+              }
+            }}
+            className="flex-grow mr-2"
+          />
+          <Button onClick={handleSendMessage}><Send className="h-4 w-4"/></Button>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-// Export the wrapper as the default export
+const ChatRoomWrapper = ({ groupId }: { groupId: string }) => {
+  const [activeTab, setActiveTab] = useState("chat");
+  
+  return (
+    <div className="h-[70vh] md:h-[80vh] flex flex-col">
+      <ChatNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {activeTab === "chat" && <ChatRoom groupId={groupId} />}
+      {activeTab === "media" && <MediaGallery groupId={groupId} />}
+      {activeTab === "expenses" && <SplitExpenses groupId={groupId} />}
+    </div>
+  );
+};
+
 export default ChatRoomWrapper;
