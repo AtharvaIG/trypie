@@ -9,13 +9,17 @@ interface GroupHeaderProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (isOpen: boolean) => void;
   handleRefresh: () => void;
+  handleCreateGroup: (groupName: string) => Promise<void>;
+  isCreating: boolean;
 }
 
 export const GroupHeader: React.FC<GroupHeaderProps> = ({
   loading,
   isDialogOpen,
   setIsDialogOpen,
-  handleRefresh
+  handleRefresh,
+  handleCreateGroup,
+  isCreating
 }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -33,8 +37,8 @@ export const GroupHeader: React.FC<GroupHeaderProps> = ({
         <CreateGroupDialog
           isOpen={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          onCreateGroup={() => Promise.resolve()} // Fixed: Now returns a Promise<void>
-          isCreating={false}
+          onCreateGroup={handleCreateGroup}
+          isCreating={isCreating}
         />
       </div>
     </div>

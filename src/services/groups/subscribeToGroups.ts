@@ -32,22 +32,31 @@ export const subscribeToUserGroups = (
                 return;
               }
               
-              // Fix: Ensure membersList is an object before checking
+              // Ensure membersList is an object 
               const membersList = group.membersList || {};
               const isUserMember = typeof membersList === 'object' && 
                              Object.keys(membersList).includes(currentUserId);
               
               if (isUserMember) {
-                // Fix: Ensure previewMembers is an array to prevent rendering issues
-                const previewMembers = Array.isArray(group.previewMembers) 
-                  ? group.previewMembers 
-                  : [group.previewMembers ? group.previewMembers.toString().charAt(0).toUpperCase() : 'U'];
+                // Ensure previewMembers is always an array
+                let previewMembers: string[] = [];
+                
+                if (Array.isArray(group.previewMembers)) {
+                  previewMembers = group.previewMembers.map(member => 
+                    typeof member === 'string' ? member : member?.toString()?.charAt(0)?.toUpperCase() || 'U'
+                  );
+                } else if (group.previewMembers) {
+                  previewMembers = [group.previewMembers.toString().charAt(0).toUpperCase()];
+                } else {
+                  previewMembers = ['U'];
+                }
                 
                 // Ensure all fields are present with fallbacks
                 groupsList.push({
                   id: key,
                   name: group.name || 'Unnamed Group',
-                  members: group.members || (typeof membersList === 'object' ? Object.keys(membersList).length : 0),
+                  members: typeof group.members === 'number' ? group.members : 
+                    (typeof membersList === 'object' ? Object.keys(membersList).length : 0),
                   lastActivity: group.lastActivity || 'Never',
                   previewMembers: previewMembers,
                   createdBy: group.createdBy || '',

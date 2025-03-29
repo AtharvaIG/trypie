@@ -17,6 +17,7 @@ const Groups = () => {
     loadError,
     isDialogOpen,
     setIsDialogOpen,
+    isCreating,
     selectedGroup,
     setSelectedGroup,
     activeTab,
@@ -66,6 +67,8 @@ const Groups = () => {
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
             handleRefresh={handleRefresh}
+            handleCreateGroup={handleCreateGroup}
+            isCreating={isCreating}
           />
           
           {/* Group list */}
