@@ -56,8 +56,8 @@ const GroupChat = () => {
   }
   
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto p-4 mt-20">
+    <div className="min-h-screen bg-background flex flex-col">
+      <main className="container mx-auto p-4 mt-20 flex-grow pb-24">
         {groupId ? (
           <>
             <div className="mb-4">
@@ -73,7 +73,7 @@ const GroupChat = () => {
             </div>
             
             {isUserInGroup || !currentUser ? (
-              <div className="bg-card rounded-lg border shadow-sm">
+              <div className="bg-card rounded-lg border shadow-sm mb-10">
                 <ChatRoomWrapper groupId={groupId} />
               </div>
             ) : (

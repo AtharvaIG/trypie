@@ -115,7 +115,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 max-h-[calc(100vh-12rem)] overflow-y-auto">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -183,7 +183,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
         </CardContent>
       </Card>
       
-      <Tabs defaultValue="expenses">
+      <Tabs defaultValue="expenses" className="mb-6">
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="expenses">Expense List</TabsTrigger>
           <TabsTrigger value="add">Add Expense</TabsTrigger>
@@ -197,9 +197,9 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                   <p>No expenses recorded yet</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                   {expenses.map((expense) => (
-                    <div key={expense.id} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div key={expense.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-secondary/10 transition-colors">
                       <div>
                         <p className="font-medium">{expense.title}</p>
                         <p className="text-sm text-muted-foreground capitalize">
@@ -225,57 +225,65 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
           <Card>
             <CardContent className="pt-6">
               <form onSubmit={handleAddExpense} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Expense Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g. Hotel Booking"
-                    value={newExpense.title}
-                    onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Expense Title</Label>
+                    <Input
+                      id="title"
+                      placeholder="e.g. Hotel Booking"
+                      value={newExpense.title}
+                      onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Amount (₹)</Label>
+                    <div className="relative">
+                      <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="0.00"
+                        className="pl-9"
+                        value={newExpense.amount}
+                        onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (₹)</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="0.00"
-                    value={newExpense.amount}
-                    onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <select
-                    id="category"
-                    value={newExpense.category}
-                    onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="accommodation">Accommodation</option>
-                    <option value="transportation">Transportation</option>
-                    <option value="food">Food & Dining</option>
-                    <option value="activities">Activities & Attractions</option>
-                    <option value="shopping">Shopping</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="paidBy">Paid By</Label>
-                  <select
-                    id="paidBy"
-                    value={newExpense.paidBy}
-                    onChange={(e) => setNewExpense({...newExpense, paidBy: e.target.value})}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="you">You</option>
-                    <option value="Alex Johnson">Alex Johnson</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      value={newExpense.category}
+                      onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="accommodation">Accommodation</option>
+                      <option value="transportation">Transportation</option>
+                      <option value="food">Food & Dining</option>
+                      <option value="activities">Activities & Attractions</option>
+                      <option value="shopping">Shopping</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="paidBy">Paid By</Label>
+                    <select
+                      id="paidBy"
+                      value={newExpense.paidBy}
+                      onChange={(e) => setNewExpense({...newExpense, paidBy: e.target.value})}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="you">You</option>
+                      <option value="Alex Johnson">Alex Johnson</option>
+                    </select>
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
@@ -287,9 +295,9 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                     </Button>
                   </Label>
                   
-                  <div className="space-y-2">
+                  <div className="border rounded-md p-3 max-h-[200px] overflow-y-auto">
                     {splitBetween.map((person) => (
-                      <div key={person.id} className="flex items-center space-x-2">
+                      <div key={person.id} className="flex items-center space-x-2 mb-2 last:mb-0 p-2 hover:bg-secondary/10 rounded-md">
                         <input
                           type="checkbox"
                           id={`person-${person.id}`}
@@ -304,7 +312,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                         <Avatar className="h-6 w-6">
                           <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <Label htmlFor={`person-${person.id}`} className="text-sm">
+                        <Label htmlFor={`person-${person.id}`} className="text-sm cursor-pointer">
                           {person.name}
                         </Label>
                       </div>

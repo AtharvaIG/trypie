@@ -71,6 +71,16 @@
   .button-glow:hover::after {
     @apply opacity-100;
   }
+  
+  /* Add page content class to ensure proper footer spacing */
+  .page-content {
+    @apply pb-24 min-h-[calc(100vh-80px)];
+  }
+  
+  /* Add main container class for consistent layout */
+  .main-container {
+    @apply container mx-auto px-4 pt-20 pb-24;
+  }
 }
 
 @layer utilities {
@@ -85,6 +95,30 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Improve scrollbars for better UX */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 20px;
+  }
+  
+  /* Content that needs to have footer space */
+  .footer-space {
+    padding-bottom: 5rem;
   }
   
   /* Add animation utilities */
