@@ -73,7 +73,9 @@ const GroupChat = () => {
             </div>
             
             {isUserInGroup || !currentUser ? (
-              <ChatRoomWrapper groupId={groupId} />
+              <div className="bg-card rounded-lg border shadow-sm">
+                <ChatRoomWrapper groupId={groupId} />
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-[50vh]">
                 <h2 className="text-2xl font-bold mb-4">You're not a member of this group</h2>

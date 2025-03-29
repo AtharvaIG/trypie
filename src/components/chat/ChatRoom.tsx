@@ -7,6 +7,10 @@ import { MessageListWrapper } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { ChatNavTabs } from './ChatNavTabs';
+import { MediaGallery } from './MediaGallery';
+import { SplitExpenses } from './SplitExpenses';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 
 type Message = {
   id: string;
@@ -33,6 +37,7 @@ export function ChatRoomWrapper({ groupId }: ChatRoomProps) {
   const [membersCount, setMembersCount] = useState(0);
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
   const [editMessage, setEditMessage] = useState<Message | null>(null);
+  const [activeTab, setActiveTab] = useState('chat');
 
   // Fetch group details
   useEffect(() => {
@@ -106,28 +111,42 @@ export function ChatRoomWrapper({ groupId }: ChatRoomProps) {
         )}
       </div>
       
-      {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
-      ) : (
-        <MessageListWrapper 
-          messages={messages}
-          onReplyToMessage={handleReplyToMessage}
-          onEditMessage={handleEditMessage}
-          groupId={groupId}
-        />
-      )}
+      <ChatNavTabs activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <div className="p-4 border-t">
-        <MessageInput 
-          groupId={groupId}
-          replyToMessage={replyToMessage}
-          onCancelReply={() => setReplyToMessage(null)}
-          editMessage={editMessage}
-          onCancelEdit={() => setEditMessage(null)}
-        />
-      </div>
+      <Tabs value={activeTab} className="flex-1 flex flex-col">
+        <TabsContent value="chat" className="flex-1 flex flex-col m-0 data-[state=inactive]:hidden">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <MessageListWrapper 
+              messages={messages}
+              onReplyToMessage={handleReplyToMessage}
+              onEditMessage={handleEditMessage}
+              groupId={groupId}
+            />
+          )}
+          
+          <div className="p-4 border-t">
+            <MessageInput 
+              groupId={groupId}
+              replyToMessage={replyToMessage}
+              onCancelReply={() => setReplyToMessage(null)}
+              editMessage={editMessage}
+              onCancelEdit={() => setEditMessage(null)}
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="media" className="flex-1 overflow-auto m-0 data-[state=inactive]:hidden">
+          <MediaGallery groupId={groupId} />
+        </TabsContent>
+        
+        <TabsContent value="expenses" className="flex-1 overflow-auto m-0 data-[state=inactive]:hidden">
+          <SplitExpenses groupId={groupId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
