@@ -79,7 +79,22 @@
   
   /* Add main container class for consistent layout */
   .main-container {
-    @apply container mx-auto px-4 pt-20 pb-24;
+    @apply container mx-auto px-4 sm:px-6 pt-20 pb-24;
+  }
+
+  /* Add mobile-friendly card styles */
+  .mobile-card {
+    @apply rounded-lg border bg-card p-4 sm:p-6 shadow-sm;
+  }
+  
+  /* Safe area utilities for mobile */
+  .pb-safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom, 24px), 24px);
+  }
+  
+  /* Responsive margin for mobile */
+  .mobile-container {
+    @apply px-4 sm:px-6 w-full max-w-full sm:max-w-none;
   }
 }
 
@@ -132,6 +147,23 @@
   
   .animate-scale-in {
     animation: scaleIn 0.2s ease-out forwards;
+  }
+  
+  /* Mobile optimizations */
+  .safe-bottom {
+    margin-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Fix dropdown z-index issues */
+  .dropdown-fix {
+    position: relative;
+    z-index: 50;
+  }
+  
+  /* Space for footer on pages with scrolling content */
+  .content-with-footer {
+    min-height: calc(100vh - 4rem);
+    padding-bottom: 4rem;
   }
 }
 
