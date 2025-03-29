@@ -72,29 +72,35 @@
     @apply opacity-100;
   }
   
-  /* Add page content class to ensure proper footer spacing */
+  /* Page content class to ensure proper footer spacing */
   .page-content {
     @apply pb-24 min-h-[calc(100vh-80px)];
   }
   
-  /* Add main container class for consistent layout */
+  /* Main container class for consistent layout */
   .main-container {
-    @apply container mx-auto px-4 sm:px-6 pt-20 pb-24;
+    @apply container mx-auto px-4 sm:px-6 pt-16 pb-20;
   }
 
-  /* Add mobile-friendly card styles */
+  /* Mobile-friendly card styles */
   .mobile-card {
-    @apply rounded-lg border bg-card p-4 sm:p-6 shadow-sm;
+    @apply rounded-lg border bg-card p-3 sm:p-5 shadow-sm;
   }
   
   /* Safe area utilities for mobile */
   .pb-safe-area-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom, 24px), 24px);
+    padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px);
   }
   
   /* Responsive margin for mobile */
   .mobile-container {
-    @apply px-4 sm:px-6 w-full max-w-full sm:max-w-none;
+    @apply px-3 sm:px-5 w-full max-w-full sm:max-w-none;
+  }
+  
+  /* Fix dropdown positioning issues */
+  .dropdown-fix {
+    position: relative;
+    z-index: 100 !important;
   }
 }
 
@@ -119,7 +125,7 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -133,7 +139,7 @@
   
   /* Content that needs to have footer space */
   .footer-space {
-    padding-bottom: 5rem;
+    padding-bottom: 4rem;
   }
   
   /* Add animation utilities */
@@ -154,16 +160,30 @@
     margin-bottom: env(safe-area-inset-bottom, 0);
   }
   
-  /* Fix dropdown z-index issues */
-  .dropdown-fix {
-    position: relative;
-    z-index: 50;
-  }
-  
   /* Space for footer on pages with scrolling content */
   .content-with-footer {
     min-height: calc(100vh - 4rem);
-    padding-bottom: 4rem;
+    padding-bottom: 5rem;
+  }
+  
+  /* Better mobile margins */
+  @media (max-width: 640px) {
+    .xs\:inline {
+      display: inline;
+    }
+    
+    .mobile-spacing {
+      margin-bottom: 5rem;
+    }
+    
+    .mobile-form-spacing {
+      margin-bottom: 1rem;
+    }
+  }
+  
+  /* Popover position fixing */
+  [data-radix-popper-content-wrapper] {
+    z-index: 100 !important;
   }
 }
 
@@ -196,4 +216,23 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Ensure all dropdown menus are above other content */
+.radix-dropdown-menu-content,
+.radix-popover-content,
+.radix-context-menu-content {
+  z-index: 100 !important;
+}
+
+/* Fix bottom spacing for mobile navigation */
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: 5rem;
+  }
+}
+
+/* Fix for popover and dropdown menu z-index */
+[data-radix-popper-content-wrapper] {
+  z-index: 100 !important;
 }

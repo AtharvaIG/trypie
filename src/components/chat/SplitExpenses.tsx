@@ -137,13 +137,6 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
     ]);
   }, [currentUser, groupId]);
 
-  useEffect(() => {
-    if (selectedParticipants.length === 0) return;
-    
-    const amount = parseFloat(form.getValues("amount")) || 0;
-    updateShares(amount, splitType);
-  }, [splitType, form.watch("amount"), selectedParticipants.length]);
-
   const updateShares = (amount: number, type: "equal" | "percentage" | "exact") => {
     if (selectedParticipants.length === 0 || amount <= 0) return;
     
@@ -356,68 +349,64 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="px-4 py-6 md:px-6 pb-20 mb-16 max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold">Split Expenses</h2>
+          <h2 className="text-xl font-bold">Split Expenses</h2>
           <p className="text-muted-foreground text-sm">
-            Track shared expenses and settle up with your group
+            Track shared expenses and settle up
           </p>
         </div>
         <Button 
           variant={showForm ? "outline" : "default"}
           size="sm"
           onClick={() => setShowForm(!showForm)}
-          className="transition-all duration-200"
         >
           {showForm ? "Cancel" : (
             <>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Expense
+              <Plus className="h-4 w-4 mr-1" />
+              Add
             </>
           )}
         </Button>
       </div>
       
-      <Card className="mb-6 overflow-hidden border shadow-sm">
-        <CardContent className="p-6">
+      <Card className="mb-4 shadow-sm">
+        <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">TOTAL BALANCE</p>
-              <p className={`text-2xl font-semibold mt-1 ${getTotalOwed(expenses) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className="text-xs uppercase font-medium text-muted-foreground">BALANCE</p>
+              <p className={`text-xl font-semibold mt-1 ${getTotalOwed(expenses) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {getTotalOwed(expenses) >= 0 ? 
                   `You are owed $${Math.abs(getTotalOwed(expenses)).toFixed(2)}` : 
                   `You owe $${Math.abs(getTotalOwed(expenses)).toFixed(2)}`
                 }
               </p>
             </div>
-            <div className={`h-14 w-14 rounded-full flex items-center justify-center ${getTotalOwed(expenses) >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-              <DollarSign className={`h-8 w-8 ${getTotalOwed(expenses) >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+            <div className={`h-12 w-12 rounded-full flex items-center justify-center ${getTotalOwed(expenses) >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+              <DollarSign className={`h-6 w-6 ${getTotalOwed(expenses) >= 0 ? 'text-green-600' : 'text-red-600'}`} />
             </div>
           </div>
         </CardContent>
       </Card>
       
       {showForm && (
-        <Card className="mb-8 border shadow-sm animate-fade-in">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center">
-              <Receipt className="h-5 w-5 mr-2" />
-              New Expense
-            </CardTitle>
+        <Card className="mb-5 shadow-sm animate-fade-in">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base">New Expense</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-2">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
                   <FormField
                     control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel className="text-xs">Description</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Dinner, Hotel, Tickets" {...field} />
+                          <Input placeholder="e.g. Dinner, Hotel, Tickets" {...field} className="h-9" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -429,13 +418,13 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Amount</FormLabel>
+                        <FormLabel className="text-xs">Amount</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            <DollarSign className="absolute left-2 top-2 h-4 w-4 text-muted-foreground pointer-events-none" />
                             <Input 
                               placeholder="0.00" 
-                              className="pl-9"
+                              className="pl-8 h-9"
                               type="number"
                               step="0.01"
                               min="0.01"
@@ -449,28 +438,28 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                   />
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="paidBy"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Paid By</FormLabel>
+                        <FormLabel className="text-xs">Paid By</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select who paid" />
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue placeholder="Who paid" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent position="popper" className="dropdown-fix">
                             {groupMembers.map(member => (
-                              <SelectItem key={member.id} value={member.id}>
+                              <SelectItem key={member.id} value={member.id} className="text-sm">
                                 <div className="flex items-center">
-                                  <Avatar className="h-6 w-6 mr-2">
-                                    <AvatarFallback>{member.name[0]}</AvatarFallback>
+                                  <Avatar className="h-5 w-5 mr-2">
+                                    <AvatarFallback className="text-xs">{member.name[0]}</AvatarFallback>
                                   </Avatar>
                                   <span>{member.id === "current" ? "You" : member.name}</span>
                                 </div>
@@ -488,7 +477,7 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                     name="splitType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Split Type</FormLabel>
+                        <FormLabel className="text-xs">Split Type</FormLabel>
                         <Select 
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -497,29 +486,14 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="h-9 text-sm">
                               <SelectValue placeholder="How to split" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="equal">
-                              <div className="flex items-center">
-                                <span>Split Equally</span>
-                                <FormDescription className="ml-2 text-xs">(Same amount for everyone)</FormDescription>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="percentage">
-                              <div className="flex items-center">
-                                <span>Split by Percentage</span>
-                                <FormDescription className="ml-2 text-xs">(Set percentages)</FormDescription>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="exact">
-                              <div className="flex items-center">
-                                <span>Split by Exact Amounts</span>
-                                <FormDescription className="ml-2 text-xs">(Set exact dollar amounts)</FormDescription>
-                              </div>
-                            </SelectItem>
+                          <SelectContent position="popper" className="dropdown-fix">
+                            <SelectItem value="equal" className="text-sm">Equal Split</SelectItem>
+                            <SelectItem value="percentage" className="text-sm">By Percentage</SelectItem>
+                            <SelectItem value="exact" className="text-sm">Exact Amounts</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -528,20 +502,20 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                   />
                 </div>
                 
-                <div className="space-y-3 mt-2">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <FormLabel className="mb-0">Split Between</FormLabel>
+                    <FormLabel className="text-xs mb-0">Split Between</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button type="button" variant="outline" size="sm" className="h-8">
-                          <Users className="h-3.5 w-3.5 mr-1.5" />
-                          Select People
-                          <Badge variant="secondary" className="ml-2">{selectedParticipants.length}</Badge>
+                        <Button type="button" variant="outline" size="sm" className="h-7 text-xs">
+                          <Users className="h-3 w-3 mr-1" />
+                          Select
+                          <Badge variant="secondary" className="ml-1 text-xs">{selectedParticipants.length}</Badge>
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-3" align="end">
-                        <p className="text-sm font-medium mb-2">Select participants</p>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                      <PopoverContent className="w-60 p-2 dropdown-fix" align="end">
+                        <p className="text-xs font-medium mb-2">Select participants</p>
+                        <div className="space-y-1 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                           {groupMembers.map((member) => (
                             <div 
                               key={member.id} 
@@ -555,12 +529,12 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                                 id={`person-${member.id}`}
                                 checked={isParticipantSelected(member.id)}
                                 onChange={() => {}}
-                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
                               />
-                              <Avatar className="h-7 w-7">
-                                <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                              <Avatar className="h-6 w-6">
+                                <AvatarFallback className="text-xs">{member.name.charAt(0)}</AvatarFallback>
                               </Avatar>
-                              <label htmlFor={`person-${member.id}`} className="text-sm flex-grow cursor-pointer">
+                              <label htmlFor={`person-${member.id}`} className="text-xs flex-grow cursor-pointer">
                                 {member.id === "current" ? "You" : member.name}
                               </label>
                             </div>
@@ -571,65 +545,59 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                   </div>
                   
                   {selectedParticipants.length > 0 ? (
-                    <div className="border rounded-lg p-4 space-y-3 bg-background">
+                    <div className="border rounded-md p-3 space-y-2 bg-background max-h-40 overflow-y-auto custom-scrollbar">
                       {selectedParticipants.map((participant) => (
-                        <div key={participant.id} className="flex items-center">
-                          <Avatar className="h-7 w-7 mr-3">
-                            <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
+                        <div key={participant.id} className="flex items-center text-sm">
+                          <Avatar className="h-6 w-6 mr-2">
+                            <AvatarFallback className="text-xs">{participant.name.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm font-medium flex-grow">
+                          <span className="text-xs font-medium flex-grow overflow-hidden text-ellipsis whitespace-nowrap">
                             {participant.id === "current" ? "You" : participant.name}
                           </span>
                           
                           {splitType === "equal" && (
-                            <span className="font-medium text-sm bg-secondary/50 px-2 py-1 rounded-md">
-                              ${participant.share.toFixed(2)} ({participant.sharePercentage}%)
+                            <span className="text-xs font-medium bg-secondary/50 px-1.5 py-0.5 rounded-md">
+                              ${participant.share.toFixed(2)}
                             </span>
                           )}
                           
                           {splitType === "percentage" && (
-                            <div className="flex items-center space-x-3 flex-grow max-w-xs">
+                            <div className="flex items-center space-x-2 flex-grow max-w-[150px]">
                               <Slider 
                                 value={[participant.sharePercentage || 0]} 
                                 onValueChange={(value) => handleSetPercentage(participant.id, value)}
                                 max={100}
                                 step={1}
-                                className="w-32 md:w-40"
+                                className="w-20"
                               />
-                              <span className="text-sm font-medium w-12 text-right">{participant.sharePercentage}%</span>
-                              <span className="text-sm font-medium bg-secondary/50 px-2 py-1 rounded-md min-w-[70px] text-right">
+                              <span className="text-xs font-medium min-w-[25px]">{participant.sharePercentage}%</span>
+                              <span className="text-xs font-medium bg-secondary/50 px-1.5 py-0.5 rounded-md min-w-[50px] text-right">
                                 ${participant.share.toFixed(2)}
                               </span>
                             </div>
                           )}
                           
                           {splitType === "exact" && (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium">$</span>
+                            <div className="flex items-center space-x-1">
+                              <span className="text-xs font-medium">$</span>
                               <Input 
                                 type="number" 
                                 value={participant.share || ""}
                                 onChange={(e) => handleSetExactAmount(participant.id, e.target.value)}
-                                className="w-24 h-8 text-sm"
+                                className="w-16 h-7 text-xs"
                                 step="0.01"
                                 min="0"
                               />
-                              <span className="text-sm text-muted-foreground">
-                                ({participant.sharePercentage}%)
-                              </span>
                             </div>
                           )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-6 border rounded-lg bg-muted/20">
-                      <Users className="mx-auto h-10 w-10 text-muted-foreground mb-2 opacity-50" />
-                      <p className="text-muted-foreground font-medium">
-                        No participants selected
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Please select at least one person to split with
+                    <div className="text-center py-4 border rounded-md bg-muted/10">
+                      <Users className="mx-auto h-8 w-8 text-muted-foreground mb-1 opacity-50" />
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Select at least one person
                       </p>
                     </div>
                   )}
@@ -639,7 +607,7 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                   <Button 
                     type="submit" 
                     disabled={selectedParticipants.length === 0}
-                    className="px-6"
+                    className="w-full sm:w-auto text-sm"
                   >
                     Save Expense
                   </Button>
@@ -650,78 +618,79 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
         </Card>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {expenses.length === 0 ? (
-          <div className="text-center py-12 border rounded-lg bg-background shadow-sm">
-            <Calculator className="mx-auto h-16 w-16 text-muted-foreground mb-4 opacity-60" />
-            <h3 className="font-medium text-lg mb-2">No expenses yet</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Add your first expense to start splitting costs with your group.
+          <div className="text-center py-8 border rounded-lg bg-background shadow-sm">
+            <Calculator className="mx-auto h-12 w-12 text-muted-foreground mb-3 opacity-60" />
+            <h3 className="font-medium text-base mb-1">No expenses yet</h3>
+            <p className="text-muted-foreground text-xs max-w-xs mx-auto">
+              Add your first expense to start splitting costs.
             </p>
             <Button 
               variant="outline"
-              className="mt-4"
+              className="mt-4 text-sm"
               onClick={() => setShowForm(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
               Add Your First Expense
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {expenses.map((expense) => (
               <Card 
                 key={expense.id} 
-                className={`overflow-hidden transition-all duration-200 ${expense.settled ? "opacity-75 bg-muted/20" : ""}`}
+                className={`overflow-hidden transition-all duration-200 shadow-sm ${expense.settled ? "opacity-75 bg-muted/20" : ""}`}
               >
                 <CardContent className="p-0">
                   <div 
-                    className="p-4 flex items-start justify-between cursor-pointer hover:bg-muted/10 transition-colors"
+                    className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted/10 transition-colors"
                     onClick={() => toggleExpenseDetails(expense.id)}
                   >
-                    <div className="flex-grow">
-                      <div className="flex items-center">
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center space-x-1.5">
                         {expense.settled && (
-                          <Badge variant="outline" className="mr-2 bg-green-100 text-green-700 border-green-200">
-                            <Check className="h-3 w-3 mr-1" />
-                            Settled
+                          <Badge variant="outline" className="p-0.5 h-5 bg-green-50 text-green-700 border-green-100">
+                            <Check className="h-3 w-3" />
                           </Badge>
                         )}
-                        <h3 className="font-medium text-base">{expense.description}</h3>
+                        <h3 className="font-medium text-sm truncate">{expense.description}</h3>
                       </div>
-                      <div className="flex items-center text-sm text-muted-foreground mt-1 space-x-2">
-                        <span>Paid by {expense.paidBy === "current" ? "you" : expense.paidByName}</span>
-                        <span>•</span>
-                        <span className="font-medium">${expense.amount.toFixed(2)}</span>
-                        <span>•</span>
-                        <span>{new Date(expense.timestamp).toLocaleDateString()}</span>
+                      <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-0.5 gap-x-1.5">
+                        <span className="whitespace-nowrap">Paid by {expense.paidBy === "current" ? "you" : expense.paidByName}</span>
+                        <span className="hidden xs:inline">•</span>
+                        <span className="font-medium whitespace-nowrap">${expense.amount.toFixed(2)}</span>
+                        <span className="hidden xs:inline">•</span>
+                        <span className="whitespace-nowrap">{new Date(expense.timestamp).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <div className="flex items-center ml-4">
+                    
+                    <div className="flex items-center gap-1 ml-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
                             <ChevronDown className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => toggleExpenseStatus(expense.id)}>
-                            <Check className="h-4 w-4 mr-2" />
+                        <DropdownMenuContent align="end" className="dropdown-fix">
+                          <DropdownMenuItem onClick={() => toggleExpenseStatus(expense.id)} className="text-xs cursor-pointer">
+                            <Check className="h-3.5 w-3.5 mr-1.5" />
                             Mark as {expense.settled ? "unsettled" : "settled"}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => removeExpense(expense.id)}
-                            className="text-destructive focus:text-destructive"
+                            className="text-destructive focus:text-destructive text-xs cursor-pointer"
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                             Delete expense
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 ml-1"
+                        className="h-7 w-7"
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleExpenseDetails(expense.id);
@@ -733,55 +702,48 @@ export const SplitExpenses: React.FC<SplitExpensesProps> = ({ groupId }) => {
                   </div>
                   
                   {activeExpense === expense.id && (
-                    <div className="border-t pt-3 px-4 pb-4 animate-fade-in">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[180px]">Person</TableHead>
-                            <TableHead>Share</TableHead>
-                            <TableHead className="text-right">Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {expense.participants.map(participant => (
-                            <TableRow key={participant.id}>
-                              <TableCell className="py-2">
-                                <div className="flex items-center">
-                                  <Avatar className="h-7 w-7 mr-2">
-                                    <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm font-medium">
-                                    {participant.id === "current" ? "You" : participant.name}
-                                  </span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-2 font-medium">${participant.share.toFixed(2)}</TableCell>
-                              <TableCell className="text-right py-2">
-                                {participant.id !== expense.paidBy && (
-                                  <Button 
-                                    variant={participant.settled ? "outline" : "secondary"}
-                                    size="sm"
-                                    className={participant.settled ? "text-green-600 border-green-200 hover:bg-green-50" : ""}
-                                    onClick={() => toggleParticipantSettled(expense.id, participant.id)}
-                                  >
-                                    {participant.settled ? (
-                                      <>
-                                        <Check className="h-3.5 w-3.5 mr-1.5" />
-                                        Settled
-                                      </>
-                                    ) : (
-                                      "Settle Up"
-                                    )}
-                                  </Button>
-                                )}
-                                {participant.id === expense.paidBy && (
-                                  <Badge variant="outline" className="bg-primary/10">Paid</Badge>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                    <div className="border-t pt-2 px-3 pb-3 animate-fade-in bg-secondary/5">
+                      <div className="text-xs font-medium text-muted-foreground mb-2">Details</div>
+                      <div className="space-y-1.5">
+                        {expense.participants.map(participant => (
+                          <div key={participant.id} className="flex items-center justify-between text-sm">
+                            <div className="flex items-center">
+                              <Avatar className="h-5 w-5 mr-1.5">
+                                <AvatarFallback className="text-xs">{participant.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs">
+                                {participant.id === "current" ? "You" : participant.name}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs font-medium">${participant.share.toFixed(2)}</span>
+                              
+                              {participant.id !== expense.paidBy && (
+                                <Button 
+                                  variant={participant.settled ? "outline" : "secondary"}
+                                  size="sm"
+                                  className={`h-6 text-xs px-2 ${participant.settled ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800" : ""}`}
+                                  onClick={() => toggleParticipantSettled(expense.id, participant.id)}
+                                >
+                                  {participant.settled ? (
+                                    <>
+                                      <Check className="h-3 w-3 mr-1" />
+                                      Paid
+                                    </>
+                                  ) : (
+                                    "Settle"
+                                  )}
+                                </Button>
+                              )}
+                              
+                              {participant.id === expense.paidBy && (
+                                <Badge variant="outline" className="text-[10px]">Paid</Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>

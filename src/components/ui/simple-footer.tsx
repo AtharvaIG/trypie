@@ -4,17 +4,15 @@ import { Link } from "react-router-dom";
 
 export function SimpleFooter() {
   return (
-    <footer className="bg-secondary/20 border-t border-border py-4">
+    <footer className="bg-background border-t border-border py-3">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <Link to="/" className="mb-2 md:mb-0">
-            <span className="text-lg font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-              TryPie
-            </span>
+        <div className="flex justify-between items-center">
+          <Link to="/" className="text-sm font-medium text-muted-foreground">
+            TryPie
           </Link>
           
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} TryPie. All rights reserved.
+            &copy; {new Date().getFullYear()} TryPie
           </p>
         </div>
       </div>

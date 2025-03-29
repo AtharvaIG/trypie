@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,10 +116,10 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
   };
   
   return (
-    <div className="space-y-6 pb-24 max-h-[calc(100vh-12rem)] overflow-y-auto">
+    <div className="space-y-5 pb-24 max-h-[calc(100vh-12rem)] overflow-y-auto pr-1 custom-scrollbar">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
+        <CardHeader className="px-4 py-4">
+          <CardTitle className="flex items-center text-lg">
             <IndianRupee className="mr-2 h-5 w-5" />
             Budget Overview
           </CardTitle>
@@ -126,7 +127,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
             Track your trip expenses against your planned budget
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-4">
           <div className="space-y-4">
             <div className="flex items-end justify-between">
               <div>
@@ -166,16 +167,16 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
             </div>
           </div>
           
-          <div className="mt-6 space-y-4">
-            <h3 className="font-medium">Expense Breakdown</h3>
-            <div className="space-y-2">
+          <div className="mt-5 space-y-3">
+            <h3 className="font-medium text-sm">Expense Breakdown</h3>
+            <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
               {Object.entries(expensesByCategory).map(([category, amount]) => (
                 <div key={category} className="flex justify-between items-center">
                   <div className="flex items-center">
                     <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
-                    <span className="capitalize">{category}</span>
+                    <span className="capitalize text-sm">{category}</span>
                   </div>
-                  <span>₹{amount.toFixed(2)}</span>
+                  <span className="text-sm">₹{amount.toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -184,31 +185,31 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
       </Card>
       
       <Tabs defaultValue="expenses" className="mb-6">
-        <TabsList className="grid grid-cols-2">
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="expenses">Expense List</TabsTrigger>
           <TabsTrigger value="add">Add Expense</TabsTrigger>
         </TabsList>
         
         <TabsContent value="expenses" className="space-y-4 pt-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 px-4 pb-4">
               {expenses.length === 0 ? (
                 <div className="text-center py-6 text-muted-foreground">
                   <p>No expenses recorded yet</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="space-y-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
                   {expenses.map((expense) => (
                     <div key={expense.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-secondary/10 transition-colors">
                       <div>
-                        <p className="font-medium">{expense.title}</p>
-                        <p className="text-sm text-muted-foreground capitalize">
+                        <p className="font-medium text-sm">{expense.title}</p>
+                        <p className="text-xs text-muted-foreground capitalize">
                           {expense.category}
                           {expense.day && ` • Day ${expense.day}`}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">₹{expense.amount.toFixed(2)}</p>
+                        <p className="font-medium text-sm">₹{expense.amount.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">
                           Paid by {expense.paidBy === "you" ? "you" : expense.paidBy}
                         </p>
@@ -223,29 +224,30 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
         
         <TabsContent value="add" className="space-y-4 pt-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 px-4 pb-4">
               <form onSubmit={handleAddExpense} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Expense Title</Label>
+                    <Label htmlFor="title" className="text-sm">Expense Title</Label>
                     <Input
                       id="title"
                       placeholder="e.g. Hotel Booking"
                       value={newExpense.title}
                       onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
                       required
+                      className="h-9"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (₹)</Label>
+                    <Label htmlFor="amount" className="text-sm">Amount (₹)</Label>
                     <div className="relative">
-                      <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <IndianRupee className="absolute left-3 top-2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="amount"
                         type="number"
                         placeholder="0.00"
-                        className="pl-9"
+                        className="pl-9 h-9"
                         value={newExpense.amount}
                         onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
                         required
@@ -256,12 +258,12 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category" className="text-sm">Category</Label>
                     <select
                       id="category"
                       value={newExpense.category}
                       onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="accommodation">Accommodation</option>
                       <option value="transportation">Transportation</option>
@@ -273,12 +275,12 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="paidBy">Paid By</Label>
+                    <Label htmlFor="paidBy" className="text-sm">Paid By</Label>
                     <select
                       id="paidBy"
                       value={newExpense.paidBy}
                       onChange={(e) => setNewExpense({...newExpense, paidBy: e.target.value})}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="you">You</option>
                       <option value="Alex Johnson">Alex Johnson</option>
@@ -287,7 +289,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="flex items-center justify-between">
+                  <Label className="flex items-center justify-between text-sm">
                     <span>Split Between</span>
                     <Button type="button" variant="ghost" size="sm" className="h-7 text-xs">
                       <Users className="h-3 w-3 mr-1" />
@@ -295,7 +297,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                     </Button>
                   </Label>
                   
-                  <div className="border rounded-md p-3 max-h-[200px] overflow-y-auto">
+                  <div className="border rounded-md p-3 max-h-[180px] overflow-y-auto custom-scrollbar">
                     {splitBetween.map((person) => (
                       <div key={person.id} className="flex items-center space-x-2 mb-2 last:mb-0 p-2 hover:bg-secondary/10 rounded-md">
                         <input
@@ -310,7 +312,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                           className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                         />
                         <Avatar className="h-6 w-6">
-                          <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="text-xs">{person.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <Label htmlFor={`person-${person.id}`} className="text-sm cursor-pointer">
                           {person.name}
@@ -320,7 +322,7 @@ export const ExpenseTracker: React.FC<ExpenseTrackerProps> = ({ itinerary, budge
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full sm:w-auto text-sm">
                   Add Expense
                 </Button>
               </form>

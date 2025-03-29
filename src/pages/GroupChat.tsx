@@ -57,11 +57,11 @@ const GroupChat = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-grow pb-safe-area-bottom">
-        <div className="container mx-auto px-4 pt-20 pb-8">
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 pt-16 pb-16">
           {groupId ? (
             <>
-              <div className="mb-4">
+              <div className="mb-4 mt-4">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -74,12 +74,12 @@ const GroupChat = () => {
               </div>
               
               {isUserInGroup || !currentUser ? (
-                <div className="bg-card rounded-lg border shadow-sm mb-10">
+                <div className="bg-card rounded-lg border shadow-sm mb-8">
                   <ChatRoomWrapper groupId={groupId} />
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-[50vh]">
-                  <h2 className="text-2xl font-bold mb-4">You're not a member of this group</h2>
+                  <h2 className="text-xl font-bold mb-4">You're not a member of this group</h2>
                   <p className="text-muted-foreground mb-6">
                     You need to join this group before you can participate in the chat.
                   </p>
@@ -96,7 +96,7 @@ const GroupChat = () => {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-[50vh]">
-              <h2 className="text-2xl font-bold mb-4">No Group Selected</h2>
+              <h2 className="text-xl font-bold mb-4">No Group Selected</h2>
               <p className="text-muted-foreground mb-6">
                 Please select a group from the groups page to start chatting.
               </p>
