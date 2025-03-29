@@ -22,10 +22,18 @@ export const createSampleGroupsIfNeeded = async (currentUserId: string): Promise
           continue;
         }
         
+        // Fix: Ensure membersList is a proper object with boolean values
         const membersList: {[key: string]: boolean} = {};
         membersList[currentUserId] = true;
-        if (group.membersList) {
-          Object.assign(membersList, group.membersList);
+        
+        // If group.membersList exists and is an object, add its entries
+        if (group.membersList && typeof group.membersList === 'object') {
+          Object.keys(group.membersList).forEach(key => {
+            membersList[key] = true;
+          });
+        } else {
+          // Add a system user if no membersList exists
+          membersList['system'] = true;
         }
         
         const updatedGroup = {
@@ -58,7 +66,7 @@ export const createSampleGroupsIfNeeded = async (currentUserId: string): Promise
       
       if (groupsData) {
         Object.values(groupsData).forEach((group: any) => {
-          if (group.membersList && group.membersList[currentUserId]) {
+          if (group.membersList && typeof group.membersList === 'object' && group.membersList[currentUserId]) {
             isMemberOfAnyGroup = true;
           }
         });
@@ -68,11 +76,13 @@ export const createSampleGroupsIfNeeded = async (currentUserId: string): Promise
           const updates: {[path: string]: any} = {};
           
           Object.entries(groupsData).forEach(([groupId, groupData]: [string, any]) => {
-            if (!groupData.membersList) {
-              groupData.membersList = {};
+            if (!groupData.membersList || typeof groupData.membersList !== 'object') {
+              // Create a valid membersList if it doesn't exist
+              updates[`groups/${groupId}/membersList`] = { [currentUserId]: true };
+            } else {
+              // Add current user to existing membersList
+              updates[`groups/${groupId}/membersList/${currentUserId}`] = true;
             }
-            groupData.membersList[currentUserId] = true;
-            updates[`groups/${groupId}/membersList/${currentUserId}`] = true;
           });
           
           if (Object.keys(updates).length > 0) {

@@ -29,17 +29,19 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   const safeGroup = {
     id: group.id,
     name: group.name || "Unnamed Group",
-    members: group.members || 0,
+    members: typeof group.members === 'number' ? group.members : 
+      (group.membersList ? Object.keys(group.membersList).length : 0),
     lastActivity: group.lastActivity || "Never",
-    previewMembers: Array.isArray(group.previewMembers) ? group.previewMembers : [],
-    membersList: group.membersList || {},
+    previewMembers: Array.isArray(group.previewMembers) ? group.previewMembers : ['?'],
+    membersList: group.membersList ? (typeof group.membersList === 'object' ? group.membersList : {}) : {},
     createdBy: group.createdBy || "",
     createdAt: group.createdAt || 0
   };
 
   // Ensure previewMembers exists and is an array
   const previewMembers = safeGroup.previewMembers;
-  const memberCount = safeGroup.members || (safeGroup.membersList ? Object.keys(safeGroup.membersList).length : 0);
+  const memberCount = typeof safeGroup.members === 'number' ? safeGroup.members : 
+    (safeGroup.membersList ? Object.keys(safeGroup.membersList).length : 0);
   const lastActivity = safeGroup.lastActivity;
 
   return (
@@ -77,7 +79,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                 className="h-8 w-8 border-2 border-background"
               >
                 <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {member}
+                  {typeof member === 'string' ? member.charAt(0).toUpperCase() : '?'}
                 </div>
               </Avatar>
             ))

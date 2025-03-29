@@ -33,7 +33,8 @@ export const GroupHeader: React.FC<GroupHeaderProps> = ({
         <CreateGroupDialog
           isOpen={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          onCreateGroup={() => {}} // This will be passed from parent
+          onCreateGroup={() => Promise.resolve()} // Fixed: Now returns a Promise<void>
+          isCreating={false}
         />
       </div>
     </div>

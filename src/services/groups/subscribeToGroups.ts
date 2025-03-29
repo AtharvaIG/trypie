@@ -32,19 +32,26 @@ export const subscribeToUserGroups = (
                 return;
               }
               
-              const isUserMember = group.membersList && 
-                               Object.keys(group.membersList || {}).includes(currentUserId);
+              // Fix: Ensure membersList is an object before checking
+              const membersList = group.membersList || {};
+              const isUserMember = typeof membersList === 'object' && 
+                             Object.keys(membersList).includes(currentUserId);
               
               if (isUserMember) {
+                // Fix: Ensure previewMembers is an array to prevent rendering issues
+                const previewMembers = Array.isArray(group.previewMembers) 
+                  ? group.previewMembers 
+                  : [group.previewMembers ? group.previewMembers.toString().charAt(0).toUpperCase() : 'U'];
+                
                 // Ensure all fields are present with fallbacks
                 groupsList.push({
                   id: key,
                   name: group.name || 'Unnamed Group',
-                  members: group.members || (group.membersList ? Object.keys(group.membersList).length : 0),
+                  members: group.members || (typeof membersList === 'object' ? Object.keys(membersList).length : 0),
                   lastActivity: group.lastActivity || 'Never',
-                  previewMembers: Array.isArray(group.previewMembers) ? group.previewMembers : ['U'],
+                  previewMembers: previewMembers,
                   createdBy: group.createdBy || '',
-                  membersList: group.membersList || {},
+                  membersList: typeof membersList === 'object' ? membersList : {},
                   createdAt: group.createdAt || 0
                 });
               }
