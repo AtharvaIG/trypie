@@ -3,6 +3,7 @@ import React from "react";
 import { useInView } from "@/lib/animations";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Scene3D } from "./scene3d";
 
 export function HeroSection() {
   const { ref, isInView } = useInView();
@@ -47,14 +48,12 @@ export function HeroSection() {
           </div>
           
           <div className={`relative transition-all duration-700 delay-200 ease-out ${isInView ? 'opacity-100' : 'opacity-0 translate-y-10'}`}>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent opacity-70 mix-blend-overlay"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1501854140801-50d01698950b?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTZ8fHRyYXZlbHxlbnwwfHx8fDE2MjM2NzAzODI&ixlib=rb-4.0.3&q=80&w=1080" 
-                alt="Scenic mountain landscape" 
-                className="w-full h-auto object-cover rounded-2xl transition-transform duration-700 hover:scale-105"
-              />
+            {/* Replace the static image with the 3D scene */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 aspect-square md:aspect-auto md:h-[450px]">
+              <Scene3D className="w-full h-full" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-70 mix-blend-overlay pointer-events-none"></div>
             </div>
+            
             <div className="absolute -bottom-6 -left-6 p-4 glass-morphism rounded-xl shadow-lg animate-fade-up">
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">

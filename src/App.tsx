@@ -3,9 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/navbar";
+import { SimpleFooter } from "@/components/ui/simple-footer";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -48,6 +49,16 @@ const HomeRoute = () => {
   </div>;
   
   return currentUser ? <Navigate to="/dashboard" /> : <Index />;
+};
+
+// Footer that only shows on non-home pages
+const ConditionalFooter = () => {
+  const location = useLocation();
+  
+  // Don't show the footer on the home page as it has its own footer
+  if (location.pathname === '/') return null;
+  
+  return <SimpleFooter />;
 };
 
 const AppContent = () => {
@@ -106,6 +117,7 @@ const AppContent = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <ConditionalFooter />
     </BrowserRouter>
   );
 };
