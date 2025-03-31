@@ -33,8 +33,8 @@ const FloatingObject = ({
     meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * speed) * 0.2;
     
     // Rotation affected by scroll
-    meshRef.current.rotation.x = rotation?.[0] || 0 + state.clock.elapsedTime * 0.2 * speed + scrollFactor;
-    meshRef.current.rotation.y = rotation?.[1] || 0 + state.clock.elapsedTime * 0.3 * speed + scrollFactor * 0.7;
+    meshRef.current.rotation.x = (rotation?.[0] || 0) + state.clock.elapsedTime * 0.2 * speed + scrollFactor;
+    meshRef.current.rotation.y = (rotation?.[1] || 0) + state.clock.elapsedTime * 0.3 * speed + scrollFactor * 0.7;
     
     // Scale changes with scroll
     const baseScale = scale || 1;
@@ -84,7 +84,7 @@ const Airplane = ({ position, scrollY = 0 }: { position: [number, number, number
   });
   
   return (
-    <group ref={meshRef} position={position} rotation={[0, Math.PI * 0.25, 0]}>
+    <group ref={meshRef} position={position} rotation={[0, Math.PI * 0.25, 0]} visible={true}>
       {/* Simplified airplane shape */}
       <mesh>
         <cylinderGeometry args={[0.2, 0.5, 2, 8]} />
@@ -120,7 +120,7 @@ const Globe = ({ position, scrollY = 0 }: { position: [number, number, number], 
   });
   
   return (
-    <mesh ref={meshRef} position={position}>
+    <mesh ref={meshRef} position={position} visible={true}>
       <sphereGeometry args={[1.5, 32, 32]} />
       <meshStandardMaterial 
         color="#1e88e5" 
@@ -185,6 +185,7 @@ const WavyPlane = ({ scrollY = 0 }) => {
       rotation={[-Math.PI / 2, 0, 0]} 
       position={[0, -2, 0]} 
       scale={10}
+      visible={true}
     >
       <planeGeometry args={[10, 10, 32, 32]} />
       <meshStandardMaterial 
@@ -202,40 +203,33 @@ const WavyPlane = ({ scrollY = 0 }) => {
 export const Scene3D = ({ className = "", scrollY = 0 }: { className?: string, scrollY?: number }) => {
   const { ref, isInView } = useInView({ once: false });
   
+  console.log("Rendering Scene3D, scrollY:", scrollY);
+  
   return (
     <div 
       ref={ref} 
       className={`${className} ${isInView ? 'opacity-100' : 'opacity-0'} transition-opacity duration-1000`}
+      style={{ minHeight: "300px" }} // Ensure minimum height even if container is collapsed
     >
       <Canvas className="w-full h-full outline-none" dpr={[1, 2]}>
+        <ambientLight intensity={1} />
+        <directionalLight position={[5, 5, 5]} intensity={1.5} castShadow />
+        
         <PerspectiveCamera 
           makeDefault 
-          position={[0, 0, 10 + scrollY * 0.01]} 
-          fov={50 - scrollY * 0.02} 
-        />
-        <fog attach="fog" args={['#ffffff', 8, 25]} />
-        
-        <ambientLight intensity={0.8} />
-        <directionalLight 
-          position={[5, 8, 5]} 
-          intensity={1.5} 
-          castShadow 
-        />
-        <spotLight
-          position={[-5, 5, 5]}
-          angle={0.15}
-          penumbra={1}
-          intensity={0.5}
+          position={[0, 0, 10]} 
+          fov={50} 
         />
         
         <group position={[0, 0, 0]} rotation={[0, scrollY * 0.002, 0]}>
+          {/* Primary objects */}
+          <Airplane position={[3, 1, -2]} scrollY={scrollY} />
+          <Globe position={[0, 0, -5]} scrollY={scrollY} />
+          
+          {/* Decorative objects */}
           <FloatingObject position={[-3, 1, 0]} color="hsl(var(--primary))" scrollY={scrollY} speed={1.2} />
           <FloatingObject position={[3, -1, -2]} scale={1.5} color="#2dd4bf" rotation={[0.5, 0.2, 0.1]} scrollY={scrollY} speed={0.8} />
           <FloatingObject position={[-2, -2, -1]} scale={0.8} color="#a78bfa" scrollY={scrollY} speed={1.5} />
-          
-          {/* Travel-themed elements */}
-          <Airplane position={[4, 1, -3]} scrollY={scrollY} />
-          <Globe position={[0, 0, -6]} scrollY={scrollY} />
           
           <WavyPlane scrollY={scrollY} />
         </group>
@@ -245,11 +239,9 @@ export const Scene3D = ({ className = "", scrollY = 0 }: { className?: string, s
           enableZoom={false} 
           enablePan={false}
           autoRotate 
-          autoRotateSpeed={0.5 + scrollY * 0.001}
-          maxPolarAngle={Math.PI / 2}
+          autoRotateSpeed={0.5}
           minPolarAngle={Math.PI / 3}
-          enableDamping
-          dampingFactor={0.05}
+          maxPolarAngle={Math.PI / 2}
         />
       </Canvas>
     </div>

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export const useInView = (options = {}) => {
@@ -9,6 +8,9 @@ export const useInView = (options = {}) => {
     // Skip if we're in SSR
     if (typeof window === 'undefined') return;
     
+    const currentRef = ref.current;
+    if (!currentRef) return;
+    
     const observer = new IntersectionObserver(([entry]) => {
       // Only update state if the visibility actually changed
       if (isInView !== entry.isIntersecting) {
@@ -16,10 +18,7 @@ export const useInView = (options = {}) => {
       }
     }, { threshold: 0.1, rootMargin: "0px", ...options });
 
-    const currentRef = ref.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    observer.observe(currentRef);
 
     return () => {
       if (currentRef) {
@@ -27,8 +26,7 @@ export const useInView = (options = {}) => {
       }
       observer.disconnect();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options]); // Don't include isInView in dependencies to prevent observer re-creation
+  }, [options, isInView]); // Include isInView in dependencies
 
   return { ref, isInView };
 };

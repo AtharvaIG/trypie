@@ -116,7 +116,7 @@ const ScrollScene = () => {
   }, [ref]);
   
   return (
-    <div ref={ref} className="h-[50vh] md:h-[70vh] relative overflow-hidden rounded-2xl">
+    <div ref={ref} className="h-[50vh] md:h-[70vh] relative overflow-hidden rounded-2xl border border-primary/10 shadow-lg">
       <Scene3D className="w-full h-full" scrollY={scrollY} />
       <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-70 pointer-events-none"></div>
     </div>
