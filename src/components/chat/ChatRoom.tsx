@@ -26,10 +26,11 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
   const [newMessage, setNewMessage] = useState("");
   const { currentUser } = useAuth();
   const chatBottomRef = useRef<HTMLDivElement>(null);
-  const messagesRef = useRef<any>(null);
   
   useEffect(() => {
     if (!groupId || !currentUser) return;
+    
+    console.log(`Connecting to messages at groups/${groupId}/messages`);
     
     // Reference to group messages - this is where we read from
     const groupMessagesRef = ref(database, `groups/${groupId}/messages`);
@@ -63,10 +64,6 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     };
   }, [groupId, currentUser]);
   
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  
   const scrollToBottom = () => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -89,12 +86,15 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     };
     
     try {
+      console.log(`Sending message to groups/${groupId}/messages/${messageId}`);
+      
       // Write directly to the group messages collection
       const messageRef = ref(database, `groups/${groupId}/messages/${messageId}`);
       await set(messageRef, message);
       
       // If this message contains an image, add it to the media collection
       if (message.imageUrl) {
+        console.log(`Saving media to groups/${groupId}/media/${messageId}`);
         const mediaRef = ref(database, `groups/${groupId}/media/${messageId}`);
         await set(mediaRef, message);
       }

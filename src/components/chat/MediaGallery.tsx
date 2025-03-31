@@ -36,6 +36,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
       
       try {
         setLoading(true);
+        console.log(`Fetching media from groups/${groupId}/media`);
         
         // Use the group media path
         const mediaRef = ref(database, `groups/${groupId}/media`);
@@ -43,10 +44,11 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
         
         const items: MediaItem[] = [];
         if (snapshot.exists()) {
-          const messages = snapshot.val();
+          const mediaData = snapshot.val();
           
-          Object.entries(messages).forEach(([key, value]: [string, any]) => {
-            if (value.imageUrl) {
+          Object.entries(mediaData).forEach(([key, value]: [string, any]) => {
+            // Only add items that have an imageUrl
+            if (value && value.imageUrl) {
               items.push({
                 id: key,
                 imageUrl: value.imageUrl,
@@ -62,6 +64,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
           items.sort((a, b) => b.timestamp - a.timestamp);
         }
         
+        console.log(`Found ${items.length} media items`);
         setMediaItems(items);
         setError(null);
       } catch (err) {
