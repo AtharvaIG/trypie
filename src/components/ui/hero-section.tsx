@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useInView } from "@/lib/animations";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -7,6 +7,17 @@ import { Scene3D } from "./scene3d";
 
 export function HeroSection() {
   const { ref, isInView } = useInView();
+  const [scrollY, setScrollY] = useState(0);
+  
+  // Track scroll position for parallax effects
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   return (
     <section 
@@ -15,13 +26,20 @@ export function HeroSection() {
     >
       <div 
         className="absolute inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixid=M3wxMjA3fDB8MXxzZWFyY2h8Mnx8dHJhdmVsfGVufDB8fHx8MTYyMzY3MDM4Mg&ixlib=rb-4.0.3&q=80&w=2000')] bg-cover bg-center"
+        style={{ 
+          transform: `translateY(${scrollY * 0.15}px)`,
+          opacity: Math.max(0.3, 1 - scrollY * 0.001) 
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-white/90" />
       </div>
       
       <div className="container mx-auto px-4 py-20 md:py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className={`space-y-6 transition-all duration-700 ease-out ${isInView ? 'opacity-100' : 'opacity-0 translate-y-10'}`}>
+          <div 
+            className={`space-y-6 transition-all duration-700 ease-out ${isInView ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
+            style={{ transform: `translateY(${-scrollY * 0.1}px)` }}
+          >
             <div className="inline-flex items-center px-3 py-1 space-x-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
               <span className="h-1.5 w-1.5 rounded-full bg-primary"></span>
               <span>Discover the world with us</span>
@@ -47,10 +65,13 @@ export function HeroSection() {
             </div>
           </div>
           
-          <div className={`relative transition-all duration-700 delay-200 ease-out ${isInView ? 'opacity-100' : 'opacity-0 translate-y-10'}`}>
-            {/* Replace the static image with the 3D scene */}
+          <div 
+            className={`relative transition-all duration-700 delay-200 ease-out ${isInView ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
+            style={{ transform: `translateY(${scrollY * 0.08}px) rotate(${scrollY * 0.01}deg)` }}
+          >
+            {/* 3D scene that reacts to scrolling */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 aspect-square md:aspect-auto md:h-[450px]">
-              <Scene3D className="w-full h-full" />
+              <Scene3D className="w-full h-full" scrollY={scrollY} />
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-70 mix-blend-overlay pointer-events-none"></div>
             </div>
             

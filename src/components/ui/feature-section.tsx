@@ -45,7 +45,7 @@ export function FeatureSection() {
               Transform Your Travel Experience
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover how Wanderly can enhance your journey with these powerful features designed for the modern traveler.
+              Discover how TryPie can enhance your journey with these powerful features designed for the modern traveler.
             </p>
           </div>
         </div>
