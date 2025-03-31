@@ -18,6 +18,8 @@ type ChatMessage = {
   senderId: string;
   senderName: string;
   timestamp: number;
+  imageUrl?: string;
+  fileType?: string;
 };
 
 const ChatRoom = ({ groupId }: { groupId: string }) => {
@@ -42,6 +44,8 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
           senderId: value.senderId,
           senderName: value.senderName,
           timestamp: value.timestamp,
+          imageUrl: value.imageUrl,
+          fileType: value.fileType
         }));
         
         // Sort messages by timestamp
@@ -92,6 +96,13 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     
     try {
       await push(messagesRef.current, message);
+      
+      // Also store in media collection if it contains an image URL
+      if (message.imageUrl) {
+        const mediaRef = ref(database, `users/${currentUser.uid}/media/${groupId}/${message.id}`);
+        await push(mediaRef, message);
+      }
+      
       setNewMessage("");
       scrollToBottom();
     } catch (error) {
@@ -116,6 +127,15 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
               {message.senderId === currentUser?.uid ? "You" : message.senderName}
             </div>
             <div>{message.text}</div>
+            {message.imageUrl && (
+              <div className="mt-2">
+                <img 
+                  src={message.imageUrl} 
+                  alt="Shared media" 
+                  className="max-w-full h-auto rounded" 
+                />
+              </div>
+            )}
             <div className="text-xs text-muted-foreground">
               {new Date(message.timestamp).toLocaleTimeString()}
             </div>
