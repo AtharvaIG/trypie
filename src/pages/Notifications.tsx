@@ -1,8 +1,6 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/ui/footer";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Heart, Users, Calendar, MessageSquare } from "lucide-react";
@@ -80,8 +78,6 @@ const Notifications = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-8 mt-20 max-w-3xl">
         <section className="mb-10">
           <h2 className="text-3xl font-bold mb-6">Notifications</h2>
@@ -133,8 +129,6 @@ const Notifications = () => {
           )}
         </section>
       </main>
-      
-      <Footer />
     </div>
   );
 };
