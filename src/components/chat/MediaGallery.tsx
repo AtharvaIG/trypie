@@ -37,9 +37,9 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
       try {
         setLoading(true);
         
-        // Use user-specific path for media items
-        const messagesRef = ref(database, `users/${currentUser.uid}/media/${groupId}`);
-        const snapshot = await get(messagesRef);
+        // Use the group media path
+        const mediaRef = ref(database, `groups/${groupId}/media`);
+        const snapshot = await get(mediaRef);
         
         const items: MediaItem[] = [];
         if (snapshot.exists()) {

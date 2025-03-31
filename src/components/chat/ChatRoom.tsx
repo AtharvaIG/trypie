@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { database } from "@/lib/firebase";
-import { ref, push, onValue, off } from "firebase/database";
+import { ref, push, onValue, off, set } from "firebase/database";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -32,10 +31,10 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
   useEffect(() => {
     if (!groupId || !currentUser) return;
     
-    // Use user-specific path for chat messages
-    messagesRef.current = ref(database, `users/${currentUser.uid}/chats/${groupId}`);
+    // Reference to group messages - this is where we read from
+    const groupMessagesRef = ref(database, `groups/${groupId}/messages`);
     
-    const unsubscribe = onValue(messagesRef.current, (snapshot) => {
+    const unsubscribe = onValue(groupMessagesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const messageList: ChatMessage[] = Object.entries(data).map(([key, value]: [string, any]) => ({
@@ -59,9 +58,7 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     });
     
     return () => {
-      if (messagesRef.current) {
-        off(messagesRef.current);
-      }
+      off(groupMessagesRef);
       unsubscribe();
     };
   }, [groupId, currentUser]);
@@ -82,12 +79,9 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
       return;
     }
     
-    if (!messagesRef.current) {
-      messagesRef.current = ref(database, `users/${currentUser.uid}/chats/${groupId}`);
-    }
-    
+    const messageId = uuidv4();
     const message: ChatMessage = {
-      id: uuidv4(),
+      id: messageId,
       text: newMessage,
       senderId: currentUser.uid,
       senderName: currentUser.displayName || "Anonymous",
@@ -95,12 +89,14 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     };
     
     try {
-      await push(messagesRef.current, message);
+      // Write directly to the group messages collection
+      const messageRef = ref(database, `groups/${groupId}/messages/${messageId}`);
+      await set(messageRef, message);
       
-      // Also store in media collection if it contains an image URL
+      // If this message contains an image, add it to the media collection
       if (message.imageUrl) {
-        const mediaRef = ref(database, `users/${currentUser.uid}/media/${groupId}/${message.id}`);
-        await push(mediaRef, message);
+        const mediaRef = ref(database, `groups/${groupId}/media/${messageId}`);
+        await set(mediaRef, message);
       }
       
       setNewMessage("");
