@@ -1,7 +1,7 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, useTexture, Environment } from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera, useTexture, Environment, Float } from "@react-three/drei";
 import { useInView } from "@/lib/animations";
 import * as THREE from "three";
 
@@ -11,29 +11,37 @@ const FloatingObject = ({
   rotation, 
   scale, 
   color, 
-  scrollY = 0 
+  scrollY = 0,
+  speed = 1
 }: { 
   position: [number, number, number], 
   rotation?: [number, number, number],
   scale?: number,
   color: string,
-  scrollY?: number
+  scrollY?: number,
+  speed?: number
 }) => {
   const meshRef = useRef<THREE.Mesh>(null!);
   
   useFrame((state) => {
     if (!meshRef.current) return;
     
-    // Gentle floating animation
-    meshRef.current.position.y += Math.sin(state.clock.elapsedTime) * 0.002;
-    
-    // Respond to scroll
+    // Scroll-based position and rotation changes
     const scrollFactor = scrollY * 0.001;
-    meshRef.current.rotation.x = 0.003 * state.clock.elapsedTime + scrollFactor;
-    meshRef.current.rotation.y = 0.002 * state.clock.elapsedTime + scrollFactor * 0.5;
     
-    // Subtle position shift based on scroll
-    meshRef.current.position.z = position[2] + scrollFactor * 2;
+    // Gentle floating animation
+    meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * speed) * 0.2;
+    
+    // Rotation affected by scroll
+    meshRef.current.rotation.x = rotation?.[0] || 0 + state.clock.elapsedTime * 0.2 * speed + scrollFactor;
+    meshRef.current.rotation.y = rotation?.[1] || 0 + state.clock.elapsedTime * 0.3 * speed + scrollFactor * 0.7;
+    
+    // Scale changes with scroll
+    const baseScale = scale || 1;
+    meshRef.current.scale.setScalar(baseScale + scrollFactor * 0.2);
+    
+    // Move along z-axis based on scroll
+    meshRef.current.position.z = position[2] + scrollFactor * 3;
   });
   
   return (
@@ -48,21 +56,106 @@ const FloatingObject = ({
         color={color} 
         roughness={0.4} 
         metalness={0.7}
+        envMapIntensity={1.5}
       />
     </mesh>
   );
 };
 
-// Abstract plane with displacement that responds to scrolling
+// Travel-themed objects
+const Airplane = ({ position, scrollY = 0 }: { position: [number, number, number], scrollY?: number }) => {
+  const meshRef = useRef<THREE.Group>(null!);
+  
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    
+    const scrollFactor = scrollY * 0.001;
+    
+    // Flying motion
+    meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.7) * 0.2;
+    meshRef.current.position.x = position[0] + Math.cos(state.clock.elapsedTime * 0.5) * 0.5;
+    
+    // Bank slightly based on direction
+    meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+    
+    // Respond to scroll
+    meshRef.current.rotation.y = Math.PI * 0.25 + scrollFactor;
+    meshRef.current.position.z = position[2] - scrollFactor * 5;
+  });
+  
+  return (
+    <group ref={meshRef} position={position} rotation={[0, Math.PI * 0.25, 0]}>
+      {/* Simplified airplane shape */}
+      <mesh>
+        <cylinderGeometry args={[0.2, 0.5, 2, 8]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, 0, -1]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.05, 0.05, 1.5, 8]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <mesh position={[0, 0.2, 0.3]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.05, 0.3, 1, 8]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+    </group>
+  );
+};
+
+// Map or globe element
+const Globe = ({ position, scrollY = 0 }: { position: [number, number, number], scrollY?: number }) => {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    
+    const scrollFactor = scrollY * 0.001;
+    
+    // Rotate the globe
+    meshRef.current.rotation.y = state.clock.elapsedTime * 0.1 + scrollFactor * 2;
+    
+    // Scale based on scroll
+    const scale = 1 + scrollFactor * 0.3;
+    meshRef.current.scale.setScalar(scale);
+  });
+  
+  return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[1.5, 32, 32]} />
+      <meshStandardMaterial 
+        color="#1e88e5" 
+        roughness={0.6} 
+        metalness={0.2}
+        emissive="#0d47a1"
+        emissiveIntensity={0.2}
+      />
+      {/* Continent-like patches */}
+      <mesh position={[0.8, 0.5, 1.2]} scale={0.4}>
+        <sphereGeometry args={[1, 8, 8]} />
+        <meshStandardMaterial color="#4caf50" roughness={0.8} />
+      </mesh>
+      <mesh position={[-0.7, 0.8, 1.1]} scale={0.3}>
+        <sphereGeometry args={[1, 8, 8]} />
+        <meshStandardMaterial color="#4caf50" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, -1.2, 0.9]} scale={0.5}>
+        <sphereGeometry args={[1, 8, 8]} />
+        <meshStandardMaterial color="#4caf50" roughness={0.8} />
+      </mesh>
+    </mesh>
+  );
+};
+
+// Abstract wavy plane that responds to scrolling
 const WavyPlane = ({ scrollY = 0 }) => {
   const meshRef = useRef<THREE.Mesh>(null!);
   
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.getElapsedTime();
-    const scrollFactor = scrollY * 0.0005;
+    const scrollFactor = scrollY * 0.001;
     
-    // Update vertices to create a wave effect
+    // Update vertices to create a wave effect that intensifies with scrolling
     const geometry = meshRef.current.geometry as THREE.PlaneGeometry;
     const position = geometry.attributes.position;
     
@@ -70,21 +163,27 @@ const WavyPlane = ({ scrollY = 0 }) => {
       const x = position.getX(i);
       const y = position.getY(i);
       
-      // Create gentle waves that intensify with scrolling
-      const z = 0.2 * Math.sin(x * 2 + time * 0.7 + scrollFactor) * 
-               Math.cos(y * 2 + time * 0.6 + scrollFactor);
+      // Create waves that respond to scroll
+      const intensity = 0.2 + scrollFactor * 0.5;
+      const frequency = 1 + scrollFactor * 2;
+      const z = intensity * Math.sin(x * frequency + time * 0.7) * 
+               Math.cos(y * frequency + time * 0.6);
       
       position.setZ(i, z);
     }
     
     position.needsUpdate = true;
+    
+    // Also change color based on scroll
+    const material = meshRef.current.material as THREE.MeshStandardMaterial;
+    material.opacity = 0.2 + scrollFactor * 0.5;
   });
   
   return (
     <mesh 
       ref={meshRef} 
       rotation={[-Math.PI / 2, 0, 0]} 
-      position={[0, -3, 0]} 
+      position={[0, -2, 0]} 
       scale={10}
     >
       <planeGeometry args={[10, 10, 32, 32]} />
@@ -101,35 +200,43 @@ const WavyPlane = ({ scrollY = 0 }) => {
 
 // Combined 3D scene with scroll responsiveness
 export const Scene3D = ({ className = "", scrollY = 0 }: { className?: string, scrollY?: number }) => {
-  const { ref, isInView } = useInView({ once: true });
+  const { ref, isInView } = useInView({ once: false });
   
   return (
     <div 
       ref={ref} 
       className={`${className} ${isInView ? 'opacity-100' : 'opacity-0'} transition-opacity duration-1000`}
     >
-      <Canvas className="w-full h-full outline-none" dpr={[1, 2]} shadows>
+      <Canvas className="w-full h-full outline-none" dpr={[1, 2]}>
         <PerspectiveCamera 
           makeDefault 
-          position={[0, 0, 10 + scrollY * 0.02]} 
+          position={[0, 0, 10 + scrollY * 0.01]} 
           fov={50 - scrollY * 0.02} 
         />
-        <fog attach="fog" args={['#ffffff', 10, 25]} />
+        <fog attach="fog" args={['#ffffff', 8, 25]} />
         
         <ambientLight intensity={0.8} />
         <directionalLight 
           position={[5, 8, 5]} 
-          intensity={1} 
+          intensity={1.5} 
           castShadow 
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+        />
+        <spotLight
+          position={[-5, 5, 5]}
+          angle={0.15}
+          penumbra={1}
+          intensity={0.5}
         />
         
-        <group position={[0, 0, 0]} rotation={[0, scrollY * 0.001, 0]}>
-          <FloatingObject position={[-3, 1, 0]} color="hsl(var(--primary))" scrollY={scrollY} />
-          <FloatingObject position={[3, -1, -2]} scale={1.5} color="#2dd4bf" rotation={[0.5, 0.2, 0.1]} scrollY={scrollY} />
-          <FloatingObject position={[0, 2, -4]} scale={2} color="#fcd34d" rotation={[0.2, 0.4, 0.1]} scrollY={scrollY} />
-          <FloatingObject position={[-2, -2, -1]} scale={0.8} color="#a78bfa" scrollY={scrollY} />
+        <group position={[0, 0, 0]} rotation={[0, scrollY * 0.002, 0]}>
+          <FloatingObject position={[-3, 1, 0]} color="hsl(var(--primary))" scrollY={scrollY} speed={1.2} />
+          <FloatingObject position={[3, -1, -2]} scale={1.5} color="#2dd4bf" rotation={[0.5, 0.2, 0.1]} scrollY={scrollY} speed={0.8} />
+          <FloatingObject position={[-2, -2, -1]} scale={0.8} color="#a78bfa" scrollY={scrollY} speed={1.5} />
+          
+          {/* Travel-themed elements */}
+          <Airplane position={[4, 1, -3]} scrollY={scrollY} />
+          <Globe position={[0, 0, -6]} scrollY={scrollY} />
+          
           <WavyPlane scrollY={scrollY} />
         </group>
         
@@ -141,6 +248,8 @@ export const Scene3D = ({ className = "", scrollY = 0 }: { className?: string, s
           autoRotateSpeed={0.5 + scrollY * 0.001}
           maxPolarAngle={Math.PI / 2}
           minPolarAngle={Math.PI / 3}
+          enableDamping
+          dampingFactor={0.05}
         />
       </Canvas>
     </div>
