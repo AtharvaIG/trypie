@@ -1,11 +1,10 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ref, get, update } from "firebase/database";
+import { ref, get, update, set } from "firebase/database";
 import { database } from "@/lib/firebase";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UserPlus, Copy } from "lucide-react";
 
@@ -49,8 +48,8 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
         userId = generateUserIdFromEmail(email);
       }
       
-      // Check if the group exists
-      const groupRef = ref(database, `groups/${groupId}`);
+      // Check if the group exists in the user's path
+      const groupRef = ref(database, `users/${currentUser.uid}/groups/${groupId}`);
       const snapshot = await get(groupRef);
       
       if (snapshot.exists()) {
@@ -78,6 +77,20 @@ export const InviteMembers: React.FC<InviteMembersProps> = ({ groupId, groupName
           membersList: membersList,
           members: Object.keys(membersList).length,
           previewMembers: previewMembers.slice(0, 5) // Only keep up to 5 preview members
+        });
+        
+        // In a real app, we would also create the group in the invited user's data
+        // For demo purposes, we'll create a simulated notification or entry
+        // This would typically be handled by a cloud function or backend service
+        
+        // Simulate creating a pending invitation for the other user
+        const invitedUserRef = ref(database, `users/${userId}/invitations/${groupId}`);
+        await set(invitedUserRef, {
+          groupId: groupId,
+          groupName: groupName,
+          invitedBy: currentUser.uid,
+          invitedByName: currentUser.displayName || "A user",
+          timestamp: Date.now()
         });
         
         toast.success(`Invited ${email} to the group`);

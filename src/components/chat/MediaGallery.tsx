@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ref, get } from 'firebase/database';
 import { database } from '@/lib/firebase';
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, FileImage, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,15 +21,24 @@ type MediaGalleryProps = {
 };
 
 export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
+  const { currentUser } = useAuth();
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMediaItems = async () => {
+      if (!currentUser) {
+        setError("You must be logged in to view media");
+        setLoading(false);
+        return;
+      }
+      
       try {
         setLoading(true);
-        const messagesRef = ref(database, `messages/${groupId}`);
+        
+        // Use user-specific path for messages
+        const messagesRef = ref(database, `users/${currentUser.uid}/messages/${groupId}`);
         const snapshot = await get(messagesRef);
         
         const items: MediaItem[] = [];
@@ -63,7 +73,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ groupId }) => {
     };
     
     fetchMediaItems();
-  }, [groupId]);
+  }, [groupId, currentUser]);
 
   if (loading) {
     return (

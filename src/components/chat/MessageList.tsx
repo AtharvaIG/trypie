@@ -18,21 +18,21 @@ type Message = {
   fileUrl?: string;
   fileName?: string;
   replyTo?: string;
-  groupId?: string; // Add groupId to the Message type
+  groupId?: string;
 };
 
 interface MessageListProps {
   messages: Message[];
   onReplyToMessage?: (message: Message) => void;
   onEditMessage?: (message: Message) => void;
-  groupId: string; // Add groupId as a required prop
+  groupId: string;
 }
 
 export function MessageListWrapper({ 
   messages = [],
   onReplyToMessage,
   onEditMessage,
-  groupId // Add groupId parameter
+  groupId
 }: MessageListProps) {
   const { currentUser } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +48,8 @@ export function MessageListWrapper({
     if (!currentUser) return;
     
     try {
-      await remove(ref(database, `messages/${groupId}/${messageId}`));
+      // Use user-specific path
+      await remove(ref(database, `users/${currentUser.uid}/messages/${groupId}/${messageId}`));
       toast.success("Message deleted");
     } catch (error) {
       console.error("Error deleting message:", error);

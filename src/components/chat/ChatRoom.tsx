@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { database } from "@/lib/firebase";
@@ -23,13 +24,14 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const { currentUser } = useAuth();
-  const messagesRef = useRef(ref(database, `chats/${groupId}`));
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<any>(null);
   
   useEffect(() => {
-    if (!groupId) return;
+    if (!groupId || !currentUser) return;
     
-    messagesRef.current = ref(database, `chats/${groupId}`);
+    // Use user-specific path for chat messages
+    messagesRef.current = ref(database, `users/${currentUser.uid}/chats/${groupId}`);
     
     const unsubscribe = onValue(messagesRef.current, (snapshot) => {
       const data = snapshot.val();
@@ -41,6 +43,10 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
           senderName: value.senderName,
           timestamp: value.timestamp,
         }));
+        
+        // Sort messages by timestamp
+        messageList.sort((a, b) => a.timestamp - b.timestamp);
+        
         setMessages(messageList);
       } else {
         setMessages([]);
@@ -49,10 +55,12 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     });
     
     return () => {
-      off(messagesRef.current);
+      if (messagesRef.current) {
+        off(messagesRef.current);
+      }
       unsubscribe();
     };
-  }, [groupId]);
+  }, [groupId, currentUser]);
   
   useEffect(() => {
     scrollToBottom();
@@ -68,6 +76,10 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     if (!currentUser) {
       toast.error("You must be logged in to send messages.");
       return;
+    }
+    
+    if (!messagesRef.current) {
+      messagesRef.current = ref(database, `users/${currentUser.uid}/chats/${groupId}`);
     }
     
     const message: ChatMessage = {

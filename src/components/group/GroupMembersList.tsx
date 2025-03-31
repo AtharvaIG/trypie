@@ -28,11 +28,11 @@ export const GroupMembersList: React.FC<GroupMembersListProps> = ({ groupId }) =
   useEffect(() => {
     if (!groupId || !currentUser) return;
 
-    const groupRef = ref(database, `groups/${groupId}`);
+    const userGroupRef = ref(database, `users/${currentUser.uid}/groups/${groupId}`);
     const fetchGroupMembers = async () => {
       try {
         // First, get the group details to know who created it
-        const groupSnapshot = await get(groupRef);
+        const groupSnapshot = await get(userGroupRef);
         if (groupSnapshot.exists()) {
           const groupData = groupSnapshot.val();
           setGroupOwner(groupData.createdBy);
@@ -101,7 +101,7 @@ export const GroupMembersList: React.FC<GroupMembersListProps> = ({ groupId }) =
     
     return () => {
       // Clean up
-      off(groupRef);
+      off(userGroupRef);
     };
   }, [groupId, currentUser]);
 
@@ -121,11 +121,11 @@ export const GroupMembersList: React.FC<GroupMembersListProps> = ({ groupId }) =
     }
     
     try {
-      // Remove member from the group's member list
-      await remove(ref(database, `groups/${groupId}/membersList/${memberId}`));
+      // Remove member from the group's member list in user-specific path
+      await remove(ref(database, `users/${currentUser.uid}/groups/${groupId}/membersList/${memberId}`));
       
       // Update the member count
-      const groupRef = ref(database, `groups/${groupId}`);
+      const groupRef = ref(database, `users/${currentUser.uid}/groups/${groupId}`);
       const snapshot = await get(groupRef);
       if (snapshot.exists()) {
         const groupData = snapshot.val();
