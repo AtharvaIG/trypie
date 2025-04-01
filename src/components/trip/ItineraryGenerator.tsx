@@ -12,9 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 
 export const ItineraryGenerator = ({ 
-  itinerary, 
+  itinerary = [], // Provide default empty array
   setItinerary, 
-  destination,
+  destination = "", // Provide default empty string
   isGenerating,
   onGenerate
 }) => {
@@ -29,35 +29,46 @@ export const ItineraryGenerator = ({
   const [editingActivity, setEditingActivity] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Safety check for itinerary to ensure it's always an array
+  const safeItinerary = Array.isArray(itinerary) ? itinerary : [];
+
   const handleDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
+    const { destination: dragDestination, source, draggableId } = result;
     
-    if (!destination) {
+    if (!dragDestination) {
       return;
     }
     
     if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
+      dragDestination.droppableId === source.droppableId &&
+      dragDestination.index === source.index
     ) {
       return;
     }
     
     // Find the source day and destination day
-    const sourceDay = itinerary.find(day => `day-${day.id}` === source.droppableId);
-    const destinationDay = itinerary.find(day => `day-${day.id}` === destination.droppableId);
+    const sourceDay = safeItinerary.find(day => `day-${day.id}` === source.droppableId);
+    const destinationDay = safeItinerary.find(day => `day-${day.id}` === dragDestination.droppableId);
+    
+    if (!sourceDay || !destinationDay) {
+      console.error("Source or destination day not found", {source, destination: dragDestination});
+      return;
+    }
+    
+    // Ensure activities arrays exist
+    const sourceActivities = Array.isArray(sourceDay.activities) ? [...sourceDay.activities] : [];
+    const destinationActivities = Array.isArray(destinationDay.activities) ? [...destinationDay.activities] : [];
     
     if (sourceDay === destinationDay) {
       // Moving within the same day
-      const newActivities = [...sourceDay.activities];
-      const [removed] = newActivities.splice(source.index, 1);
-      newActivities.splice(destination.index, 0, removed);
+      const [removed] = sourceActivities.splice(source.index, 1);
+      sourceActivities.splice(dragDestination.index, 0, removed);
       
-      const newItinerary = itinerary.map(day => {
+      const newItinerary = safeItinerary.map(day => {
         if (day.id === sourceDay.id) {
           return {
             ...day,
-            activities: newActivities
+            activities: sourceActivities
           };
         }
         return day;
@@ -66,13 +77,10 @@ export const ItineraryGenerator = ({
       setItinerary(newItinerary);
     } else {
       // Moving between days
-      const sourceActivities = [...sourceDay.activities];
-      const destinationActivities = [...destinationDay.activities];
-      
       const [removed] = sourceActivities.splice(source.index, 1);
-      destinationActivities.splice(destination.index, 0, removed);
+      destinationActivities.splice(dragDestination.index, 0, removed);
       
-      const newItinerary = itinerary.map(day => {
+      const newItinerary = safeItinerary.map(day => {
         if (day.id === sourceDay.id) {
           return {
             ...day,
@@ -119,11 +127,13 @@ export const ItineraryGenerator = ({
   };
 
   const handleDeleteActivity = (dayId, activityId) => {
-    const updatedItinerary = itinerary.map(day => {
+    const updatedItinerary = safeItinerary.map(day => {
       if (day.id === dayId) {
         return {
           ...day,
-          activities: day.activities.filter(activity => activity.id !== activityId)
+          activities: Array.isArray(day.activities) 
+            ? day.activities.filter(activity => activity.id !== activityId)
+            : []
         };
       }
       return day;
@@ -139,13 +149,15 @@ export const ItineraryGenerator = ({
       return;
     }
     
-    const updatedItinerary = itinerary.map(day => {
+    const updatedItinerary = safeItinerary.map(day => {
       if (day.id === selectedDay) {
+        const activities = Array.isArray(day.activities) ? [...day.activities] : [];
+        
         if (editingActivity) {
           // Editing existing activity
           return {
             ...day,
-            activities: day.activities.map(activity => {
+            activities: activities.map(activity => {
               if (activity.id === editingActivity) {
                 return {
                   ...activity,
@@ -163,7 +175,7 @@ export const ItineraryGenerator = ({
           };
           return {
             ...day,
-            activities: [...day.activities, newActivityItem]
+            activities: [...activities, newActivityItem]
           };
         }
       }
@@ -175,7 +187,7 @@ export const ItineraryGenerator = ({
     toast.success(editingActivity ? "Activity updated" : "Activity added to itinerary");
   };
 
-  if (itinerary.length === 0) {
+  if (!safeItinerary.length) {
     return (
       <Card className="bg-white rounded-xl border border-border shadow-sm p-6 text-center">
         <div className="py-12 flex flex-col items-center">
@@ -234,7 +246,7 @@ export const ItineraryGenerator = ({
       
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="space-y-6">
-          {itinerary.map((day) => (
+          {safeItinerary.map((day) => (
             <Card key={day.id} className="bg-white">
               <CardHeader className="pb-2">
                 <CardTitle className="flex justify-between items-center">
@@ -256,7 +268,7 @@ export const ItineraryGenerator = ({
                       ref={provided.innerRef}
                       className="space-y-3"
                     >
-                      {day.activities.map((activity, index) => (
+                      {Array.isArray(day.activities) && day.activities.map((activity, index) => (
                         <Draggable
                           key={activity.id}
                           draggableId={activity.id}
@@ -313,7 +325,7 @@ export const ItineraryGenerator = ({
                         </Draggable>
                       ))}
                       {provided.placeholder}
-                      {day.activities.length === 0 && (
+                      {(!day.activities || day.activities.length === 0) && (
                         <div className="p-4 text-center border border-dashed border-border rounded-lg">
                           <p className="text-sm text-muted-foreground">No activities for this day. Click "+" to add one.</p>
                         </div>
