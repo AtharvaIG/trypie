@@ -27,13 +27,14 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
   const [newMessage, setNewMessage] = useState("");
   const { currentUser } = useAuth();
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
   
   useEffect(() => {
     if (!groupId || !currentUser) return;
     
     console.log(`Connecting to messages at groups/${groupId}/messages`);
     
-    // Reference to group messages - this is where we read from
+    // Reference to group messages
     const groupMessagesRef = ref(database, `groups/${groupId}/messages`);
     
     const unsubscribe = onValue(groupMessagesRef, (snapshot) => {
@@ -61,7 +62,7 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
     
     return () => {
       off(groupMessagesRef);
-      unsubscribe();
+      console.log("Disconnected from messages");
     };
   }, [groupId, currentUser]);
   
@@ -70,70 +71,85 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
   };
   
   const handleSendMessage = async () => {
-    if (newMessage.trim() === "") return;
+    if (newMessage.trim() === "" || isSending) return;
     
     if (!currentUser) {
       toast.error("You must be logged in to send messages.");
       return;
     }
     
+    if (!groupId) {
+      toast.error("Invalid group selected.");
+      return;
+    }
+    
+    setIsSending(true);
+    
     try {
       const messageId = uuidv4();
+      console.log("Creating message with ID:", messageId);
+      
       const message = {
-        id: messageId,
         text: newMessage.trim(),
         senderId: currentUser.uid,
         senderName: currentUser.displayName || "Anonymous",
         timestamp: Date.now(),
       };
       
-      console.log(`Sending message to groups/${groupId}/messages/${messageId}`);
+      console.log(`Sending message to groups/${groupId}/messages/${messageId}`, message);
       
-      // Write directly to the group messages collection
+      // Write directly to the specific message path
       const messageRef = ref(database, `groups/${groupId}/messages/${messageId}`);
       await set(messageRef, message);
       
+      console.log("Message sent successfully");
       setNewMessage("");
       scrollToBottom();
-      
-      // Success toast
-      toast.success("Message sent");
+      toast.success("Message sent successfully");
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send message. Please try again.");
+      toast.error(`Failed to send message: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsSending(false);
     }
   };
   
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow overflow-y-auto p-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`mb-2 p-2 rounded-lg ${
-              message.senderId === currentUser?.uid
-                ? "bg-primary/10 ml-auto text-right"
-                : "bg-secondary/10 mr-auto text-left"
-            }`}
-          >
-            <div className="text-xs text-muted-foreground">
-              {message.senderId === currentUser?.uid ? "You" : message.senderName}
-            </div>
-            <div>{message.text}</div>
-            {message.imageUrl && (
-              <div className="mt-2">
-                <img 
-                  src={message.imageUrl} 
-                  alt="Shared media" 
-                  className="max-w-full h-auto rounded" 
-                />
-              </div>
-            )}
-            <div className="text-xs text-muted-foreground">
-              {new Date(message.timestamp).toLocaleTimeString()}
-            </div>
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            No messages yet. Start the conversation!
           </div>
-        ))}
+        ) : (
+          messages.map((message) => (
+            <div
+              key={message.id}
+              className={`mb-2 p-2 rounded-lg ${
+                message.senderId === currentUser?.uid
+                  ? "bg-primary/10 ml-auto text-right"
+                  : "bg-secondary/10 mr-auto text-left"
+              } max-w-[75%]`}
+            >
+              <div className="text-xs text-muted-foreground">
+                {message.senderId === currentUser?.uid ? "You" : message.senderName}
+              </div>
+              <div className="break-words">{message.text}</div>
+              {message.imageUrl && (
+                <div className="mt-2">
+                  <img 
+                    src={message.imageUrl} 
+                    alt="Shared media" 
+                    className="max-w-full h-auto rounded" 
+                  />
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground">
+                {new Date(message.timestamp).toLocaleTimeString()}
+              </div>
+            </div>
+          ))
+        )}
         <div ref={chatBottomRef} />
       </div>
       
@@ -145,13 +161,24 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
                 handleSendMessage();
               }
             }}
             className="flex-grow mr-2"
+            disabled={isSending}
           />
-          <Button onClick={handleSendMessage}><Send className="h-4 w-4"/></Button>
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={isSending || newMessage.trim() === ""}
+          >
+            {isSending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
     </div>
