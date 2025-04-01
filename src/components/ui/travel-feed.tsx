@@ -81,6 +81,8 @@ const LazyImage = ({ src, alt }: { src: string; alt: string }) => {
 const TravelPost = memo(({ post }: { post: typeof TRAVEL_POSTS[0]; index?: number }) => {
   const { ref, isInView } = useInView({ threshold: 0.1 });
   
+  if (!post) return null; // Guard against null or undefined posts
+  
   return (
     <div
       key={post.id}
@@ -93,36 +95,36 @@ const TravelPost = memo(({ post }: { post: typeof TRAVEL_POSTS[0]; index?: numbe
       <div className="p-4 flex items-center gap-3">
         <Avatar className="h-9 w-9">
           <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-            {post.author.avatar}
+            {post.author?.avatar || '?'}
           </div>
         </Avatar>
         <div>
-          <p className="font-medium text-sm">{post.author.name}</p>
-          <p className="text-xs text-muted-foreground">{post.location}</p>
+          <p className="font-medium text-sm">{post.author?.name || 'Unknown User'}</p>
+          <p className="text-xs text-muted-foreground">{post.location || 'Unknown Location'}</p>
         </div>
       </div>
       
       <AspectRatio ratio={4/3} className="bg-muted">
-        <LazyImage src={post.image} alt={post.caption} />
+        <LazyImage src={post.image || '/placeholder.svg'} alt={post.caption || 'Travel image'} />
       </AspectRatio>
       
       <div className="p-4">
         <div className="flex gap-4 mb-3">
           <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
             <Heart className="h-4 w-4 mr-1" />
-            {post.likes}
+            {post.likes || 0}
           </button>
           <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
             <MessageSquare className="h-4 w-4 mr-1" />
-            {post.comments}
+            {post.comments || 0}
           </button>
           <button className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
             <Share2 className="h-4 w-4" />
           </button>
         </div>
         
-        <p className="text-sm mb-1">{post.caption}</p>
-        <p className="text-xs text-muted-foreground">{post.timestamp}</p>
+        <p className="text-sm mb-1">{post.caption || ''}</p>
+        <p className="text-xs text-muted-foreground">{post.timestamp || ''}</p>
       </div>
     </div>
   );
@@ -132,12 +134,21 @@ TravelPost.displayName = 'TravelPost';
 
 export function TravelFeed({ limit, key }: TravelFeedProps) {
   // Filter posts based on limit if provided
-  const displayPosts = limit ? TRAVEL_POSTS.slice(0, limit) : TRAVEL_POSTS;
+  const posts = TRAVEL_POSTS || [];
+  const displayPosts = limit && posts.length > 0 ? posts.slice(0, limit) : posts;
+  
+  if (!Array.isArray(displayPosts) || displayPosts.length === 0) {
+    return (
+      <div className="text-center p-8 bg-secondary/20 rounded-lg border border-border">
+        <p className="text-muted-foreground">No travel posts available right now.</p>
+      </div>
+    );
+  }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" key={key || 'travel-feed'}>
       {displayPosts.map((post) => (
-        <TravelPost key={post.id} post={post} />
+        <TravelPost key={post.id || `post-${Math.random()}`} post={post} />
       ))}
     </div>
   );

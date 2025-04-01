@@ -11,22 +11,47 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
+// Define types for better type safety
+interface Activity {
+  id: string;
+  time: string;
+  title: string;
+  description: string;
+  location: string;
+  cost: number;
+}
+
+interface ItineraryDay {
+  id: string;
+  day: number;
+  date: Date;
+  activities: Activity[];
+}
+
+interface ItineraryGeneratorProps {
+  itinerary?: ItineraryDay[];
+  setItinerary: (itinerary: ItineraryDay[]) => void;
+  destination?: string;
+  isGenerating: boolean;
+  onGenerate: () => void;
+}
+
 export const ItineraryGenerator = ({ 
   itinerary = [], // Provide default empty array
   setItinerary, 
   destination = "", // Provide default empty string
   isGenerating,
   onGenerate
-}) => {
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [newActivity, setNewActivity] = useState({
+}: ItineraryGeneratorProps) => {
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [newActivity, setNewActivity] = useState<Omit<Activity, 'id'>>({
     time: "12:00 PM",
     title: "",
     description: "",
     location: "",
     cost: 0
   });
-  const [editingActivity, setEditingActivity] = useState(null);
+  const [editingActivity, setEditingActivity] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Safety check for itinerary to ensure it's always an array
@@ -100,7 +125,7 @@ export const ItineraryGenerator = ({
     }
   };
 
-  const handleAddActivity = (dayId) => {
+  const handleAddActivity = (dayId: string) => {
     setSelectedDay(dayId);
     setEditingActivity(null);
     setNewActivity({
@@ -113,7 +138,7 @@ export const ItineraryGenerator = ({
     setIsDialogOpen(true);
   };
 
-  const handleEditActivity = (dayId, activity) => {
+  const handleEditActivity = (dayId: string, activity: Activity) => {
     setSelectedDay(dayId);
     setEditingActivity(activity.id);
     setNewActivity({
@@ -126,7 +151,7 @@ export const ItineraryGenerator = ({
     setIsDialogOpen(true);
   };
 
-  const handleDeleteActivity = (dayId, activityId) => {
+  const handleDeleteActivity = (dayId: string, activityId: string) => {
     const updatedItinerary = safeItinerary.map(day => {
       if (day.id === dayId) {
         return {

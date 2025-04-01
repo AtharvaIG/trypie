@@ -68,7 +68,7 @@ export const useGroups = () => {
         currentUser.uid,
         (groupsList) => {
           console.log("Groups loaded successfully:", groupsList?.length || 0);
-          console.log("Groups data:", JSON.stringify(groupsList).substring(0, 100) + "...");
+          console.log("Groups data:", groupsList ? JSON.stringify(groupsList).substring(0, 100) + "..." : "null");
           // Ensure we always set a valid array
           setGroups(Array.isArray(groupsList) ? groupsList : []);
           setLoading(false);
@@ -112,8 +112,8 @@ export const useGroups = () => {
       const groupId = await createGroup(
         groupName,
         currentUser.uid,
-        currentUser.email,
-        currentUser.displayName
+        currentUser.email || "",
+        currentUser.displayName || "Anonymous User"
       );
       
       setIsDialogOpen(false);

@@ -3,27 +3,43 @@ import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Footer } from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { CalendarIcon, Loader2, Plus, UserPlus, DollarSign, Map, MapPin, Clock, Activity } from "lucide-react";
-import { format } from "date-fns";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Loader2 } from "lucide-react";
 import { TripDetailsForm } from "@/components/trip/TripDetailsForm";
 import { ItineraryGenerator } from "@/components/trip/ItineraryGenerator";
 import { GroupCollaboration } from "@/components/trip/GroupCollaboration";
 import { toast } from "sonner";
 import { Navigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Map, Clock, UserPlus } from "lucide-react";
+
+// Define proper types
+interface TripDetails {
+  destination: string;
+  startDate?: Date;
+  endDate?: Date;
+  budget: number;
+  tripType: string;
+  notes: string;
+}
+
+interface ItineraryDay {
+  id: string;
+  day: number;
+  date: Date;
+  activities: Array<{
+    id: string;
+    time: string;
+    title: string;
+    description: string;
+    location: string;
+    cost: number;
+  }>;
+}
 
 const CreateTrip = () => {
   const { currentUser, loading } = useAuth();
   const [currentTab, setCurrentTab] = useState("details");
-  const [tripDetails, setTripDetails] = useState({
+  const [tripDetails, setTripDetails] = useState<TripDetails>({
     destination: "",
     startDate: undefined,
     endDate: undefined,
@@ -31,7 +47,7 @@ const CreateTrip = () => {
     tripType: "",
     notes: ""
   });
-  const [itinerary, setItinerary] = useState<any[]>([]); // Explicitly initialize as empty array with type
+  const [itinerary, setItinerary] = useState<ItineraryDay[]>([]); // Initialize as empty array
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,7 +63,7 @@ const CreateTrip = () => {
     return <Navigate to="/login" />;
   }
 
-  const handleTripDetailsChange = (details: any) => {
+  const handleTripDetailsChange = (details: TripDetails) => {
     setTripDetails(details);
   };
 
@@ -147,7 +163,7 @@ const CreateTrip = () => {
         : defaultActivities;
       
       const generatedItinerary = Array.from({ length: days }, (_, index) => {
-        const date = new Date(tripDetails.startDate);
+        const date = new Date(tripDetails.startDate as Date);
         date.setDate(date.getDate() + index);
         
         const dayTemplate = activityTemplates[index % activityTemplates.length];
