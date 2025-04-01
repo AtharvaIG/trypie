@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { database } from "@/lib/firebase";
@@ -76,31 +77,27 @@ const ChatRoom = ({ groupId }: { groupId: string }) => {
       return;
     }
     
-    const messageId = uuidv4();
-    const message: ChatMessage = {
-      id: messageId,
-      text: newMessage,
-      senderId: currentUser.uid,
-      senderName: currentUser.displayName || "Anonymous",
-      timestamp: Date.now(),
-    };
-    
     try {
+      const messageId = uuidv4();
+      const message = {
+        id: messageId,
+        text: newMessage.trim(),
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || "Anonymous",
+        timestamp: Date.now(),
+      };
+      
       console.log(`Sending message to groups/${groupId}/messages/${messageId}`);
       
       // Write directly to the group messages collection
       const messageRef = ref(database, `groups/${groupId}/messages/${messageId}`);
       await set(messageRef, message);
       
-      // If this message contains an image, add it to the media collection
-      if (message.imageUrl) {
-        console.log(`Saving media to groups/${groupId}/media/${messageId}`);
-        const mediaRef = ref(database, `groups/${groupId}/media/${messageId}`);
-        await set(mediaRef, message);
-      }
-      
       setNewMessage("");
       scrollToBottom();
+      
+      // Success toast
+      toast.success("Message sent");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message. Please try again.");
