@@ -31,7 +31,7 @@ const CreateTrip = () => {
     tripType: "",
     notes: ""
   });
-  const [itinerary, setItinerary] = useState([]);
+  const [itinerary, setItinerary] = useState<any[]>([]); // Explicitly initialize as empty array with type
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,7 +47,7 @@ const CreateTrip = () => {
     return <Navigate to="/login" />;
   }
 
-  const handleTripDetailsChange = (details) => {
+  const handleTripDetailsChange = (details: any) => {
     setTripDetails(details);
   };
 
@@ -61,12 +61,19 @@ const CreateTrip = () => {
     
     // Enhanced mock API call with destination-specific recommendations
     setTimeout(() => {
+      // Make sure we have valid dates before calculating
+      if (!tripDetails.startDate || !tripDetails.endDate) {
+        setIsGenerating(false);
+        toast.error("Please select valid dates");
+        return;
+      }
+      
       const days = Math.ceil(
         (tripDetails.endDate.getTime() - tripDetails.startDate.getTime()) / (1000 * 60 * 60 * 24)
       ) + 1;
       
       // Destination-specific activities based on the selected city
-      const citySpecificActivities = {
+      const citySpecificActivities: Record<string, any[]> = {
         "San Francisco, USA": [
           {
             morning: {
@@ -134,7 +141,10 @@ const CreateTrip = () => {
         }
       ];
       
-      const activityTemplates = citySpecificActivities[tripDetails.destination] || defaultActivities;
+      // Check if we have activities for the selected destination
+      const activityTemplates = tripDetails.destination && citySpecificActivities[tripDetails.destination] 
+        ? citySpecificActivities[tripDetails.destination] 
+        : defaultActivities;
       
       const generatedItinerary = Array.from({ length: days }, (_, index) => {
         const date = new Date(tripDetails.startDate);
@@ -182,7 +192,7 @@ const CreateTrip = () => {
     }, 2000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
